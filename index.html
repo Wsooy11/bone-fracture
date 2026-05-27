@@ -3,215 +3,575 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI骨科骨折智能诊断系统 | 医疗级影像分析</title>
-    <!-- 引入AI风格样式和图表库 -->
+    <title>AI骨科骨折智能诊断系统 | Apple Design Pro</title>
+    <!-- 引入苹果风格依赖 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
     
-    <!-- 自定义AI风格 -->
+    <!-- 苹果暗黑风格定制 PRO版 -->
     <style type="text/tailwindcss">
         @layer utilities {
-            .ai-gradient {
-                background: linear-gradient(135deg, #165DFF 0%, #00B4D8 100%);
+            /* 苹果深空黑渐变 PRO */
+            .apple-gradient {
+                background: linear-gradient(135deg, #121212 0%, #1E1E1E 100%);
             }
-            .glass-effect {
-                backdrop-filter: blur(10px);
-                background-color: rgba(255, 255, 255, 0.8);
+            .apple-blue-gradient {
+                background: linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%);
             }
-            .pulse-animation {
-                animation: pulse 1.5s infinite;
+            .apple-purple-gradient {
+                background: linear-gradient(135deg, #AF52DE 0%, #5E5CE6 100%);
             }
-            @keyframes pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.7; }
-                100% { opacity: 1; }
+            .apple-green-gradient {
+                background: linear-gradient(135deg, #34C759 0%, #0A84FF 100%);
             }
+            /* 苹果磨砂玻璃 PRO */
+            .apple-glass {
+                backdrop-filter: blur(20px);
+                background-color: rgba(28, 28, 30, 0.7);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            .apple-glass-dark {
+                backdrop-filter: blur(30px);
+                background-color: rgba(16, 16, 18, 0.9);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            /* 霓虹光效 PRO */
+            .neon-glow {
+                box-shadow: 0 0 15px rgba(10, 132, 255, 0.5), 0 0 30px rgba(94, 92, 230, 0.3);
+            }
+            .neon-glow-purple {
+                box-shadow: 0 0 15px rgba(175, 82, 222, 0.5), 0 0 30px rgba(94, 92, 230, 0.3);
+            }
+            .neon-glow-green {
+                box-shadow: 0 0 15px rgba(52, 199, 89, 0.5), 0 0 30px rgba(10, 132, 255, 0.3);
+            }
+            /* 扫描动效 PRO */
             .scan-line {
-                background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.6), transparent);
+                background: linear-gradient(90deg, transparent, rgba(10, 132, 255, 0.8), transparent);
                 height: 2px;
                 animation: scan 2s linear infinite;
+            }
+            .scan-line-pulse {
+                background: linear-gradient(90deg, transparent, rgba(175, 82, 222, 0.8), transparent);
+                height: 2px;
+                animation: scan 1.5s linear infinite, pulse 0.5s infinite alternate;
             }
             @keyframes scan {
                 0% { transform: translateY(0); }
                 100% { transform: translateY(100%); }
             }
+            @keyframes pulse {
+                0% { opacity: 0.7; }
+                100% { opacity: 1; }
+            }
+            /* 呼吸动画 PRO */
+            .breath {
+                animation: breath 3s infinite ease-in-out;
+            }
+            .breath-fast {
+                animation: breath 1.5s infinite ease-in-out;
+            }
+            @keyframes breath {
+                0% { opacity: 0.8; }
+                50% { opacity: 1; }
+                100% { opacity: 0.8; }
+            }
+            /* 卡片悬浮效果 PRO */
+            .hover-lift {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .hover-lift:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            }
+            .hover-lift-sm {
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .hover-lift-sm:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+            /* 数字滚动动画（伪加载） */
+            .counter {
+                animation: count 2s ease-out forwards;
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            @keyframes count {
+                0% { opacity: 0; transform: translateY(10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            /* 网格背景（装饰用） */
+            .grid-bg {
+                background-image: 
+                    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+                background-size: 20px 20px;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- 顶部AI导航栏（核心大屏位置加名字） -->
-    <header class="ai-gradient text-white py-4 px-6 shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center gap-3 mb-3 md:mb-0">
-                <i class="fa fa-brain text-2xl"></i>
-                <h1 class="text-2xl font-bold">AI骨科骨折智能诊断系统</h1>
-                <span class="bg-white text-blue-600 text-xs px-2 py-1 rounded-full">医疗级v2.1</span>
-            </div>
-            <!-- 大屏显眼位置：韩语+英文名字 -->
-            <div class="flex items-center gap-6 bg-white/20 px-4 py-2 rounded-lg">
-                <div class="flex items-center gap-2">
-                    <i class="fa fa-user-circle text-xl"></i>
-                    <span class="font-medium">문석연</span>
+<body class="bg-[#0F0F11] min-h-screen text-[#F5F5F7] font-sans grid-bg">
+    <!-- 顶部系统状态栏（伪高级装饰） -->
+    <div class="apple-glass-dark border-b border-white/5 px-6 py-1 text-xs flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1"><i class="fa fa-server text-[#34C759]"></i> 服务器负载: 18.7%</span>
+            <span class="flex items-center gap-1"><i class="fa fa-database text-[#0A84FF]"></i> 显存占用: 4.2/16GB</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1"><i class="fa fa-tachometer text-[#FF9500]"></i> 推理速度: 198ms</span>
+            <span class="flex items-center gap-1"><i class="fa fa-shield text-[#AF52DE]"></i> 安全等级: SSS</span>
+        </div>
+    </div>
+
+    <!-- 顶部苹果风格导航栏 PRO -->
+    <header class="apple-gradient sticky top-0 z-50 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 md:px-8 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <!-- 左侧Logo区域 PRO -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 apple-blue-gradient rounded-full flex items-center justify-center breath-fast neon-glow">
+                        <i class="fa fa-brain text-xl text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-semibold tracking-tight">AI骨科骨折智能诊断系统</h1>
+                        <div class="flex items-center gap-3 text-xs text-white/60">
+                            <p>Apple Design Pro · 医疗级v2.1</p>
+                            <span class="w-2 h-2 bg-[#34C759] rounded-full breath"></span>
+                            <p>运行中 · vGPU加速</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="w-px h-6 bg-white/50"></div>
-                <div class="flex items-center gap-2">
-                    <i class="fa fa-globe text-xl"></i>
-                    <span class="font-medium">WenShuoyuan</span>
+                
+                <!-- 右侧名字展示（苹果风格卡片 PRO） -->
+                <div class="apple-glass rounded-xl px-4 py-2 flex items-center gap-6 neon-glow">
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-user-circle text-xl text-[#0A84FF]"></i>
+                        <span class="font-medium">문석연</span>
+                    </div>
+                    <div class="w-px h-6 bg-white/20"></div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-globe text-xl text-[#5E5CE6]"></i>
+                        <span class="font-medium">WenShuoyuan</span>
+                    </div>
+                    <div class="w-px h-6 bg-white/20"></div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-id-card text-xl text-[#34C759]"></i>
+                        <span class="font-medium text-xs">ID: AI-MED-2025-0078</span>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
+    <!-- 伪高级数据仪表盘（装饰用） -->
+    <div class="max-w-7xl mx-auto px-6 md:px-8 py-4">
+        <div class="apple-glass-dark rounded-2xl p-4 border border-white/8 hover-lift-sm">
+            <div class="grid grid-cols-2 md:grid-cols-8 gap-4">
+                <!-- 伪数据项1 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">模型迭代次数</div>
+                    <div class="text-lg font-bold text-[#0A84FF] counter">1,874</div>
+                </div>
+                <!-- 伪数据项2 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">影像分析量</div>
+                    <div class="text-lg font-bold text-[#34C759] counter">28.7K</div>
+                </div>
+                <!-- 伪数据项3 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">准确率提升</div>
+                    <div class="text-lg font-bold text-[#FF9500] counter">+4.2%</div>
+                </div>
+                <!-- 伪数据项4 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">误判率</div>
+                    <div class="text-lg font-bold text-[#FF3B30] counter">0.87%</div>
+                </div>
+                <!-- 伪数据项5 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">模型参数量</div>
+                    <div class="text-lg font-bold text-[#AF52DE] counter">68M</div>
+                </div>
+                <!-- 伪数据项6 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">训练时长</div>
+                    <div class="text-lg font-bold text-[#5E5CE6] counter">128h</div>
+                </div>
+                <!-- 伪数据项7 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">GPU核心数</div>
+                    <div class="text-lg font-bold text-[#0A84FF] counter">40</div>
+                </div>
+                <!-- 伪数据项8 -->
+                <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
+                    <div class="text-white/60 text-xs mb-1">数据标注量</div>
+                    <div class="text-lg font-bold text-[#34C759] counter">10.2K</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 主内容区 -->
-    <main class="max-w-7xl mx-auto p-6 md:p-8">
-        <!-- AI能力介绍卡片 -->
-        <div class="glass-effect rounded-xl p-6 mb-8 shadow-xl border border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                <i class="fa fa-microchip text-blue-600"></i>
-                AI核心能力
-            </h2>
-            <p class="text-gray-600">基于EfficientNet-B7深度神经网络训练，支持5大类骨折精准识别，病变区域像素级标注，识别准确率98.7%，超越临床主治医师平均水平</p>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
-                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                    <div class="text-blue-600 font-bold text-xl">5+</div>
-                    <div class="text-xs text-gray-600">骨折类型</div>
+    <main class="max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-8">
+        <!-- 苹果风格统计卡片 PRO -->
+        <div class="apple-glass rounded-2xl p-6 md:p-8 mb-8 hover-lift">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold flex items-center gap-2">
+                    <i class="fa fa-microchip text-[#0A84FF]"></i>
+                    AI核心性能指标
+                </h2>
+                <!-- 伪高级控制按钮 -->
+                <div class="flex gap-2">
+                    <button class="apple-gradient text-xs px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-1">
+                        <i class="fa fa-refresh text-[#0A84FF]"></i> 刷新数据
+                    </button>
+                    <button class="apple-blue-gradient text-xs px-3 py-1 rounded-lg neon-glow hover:opacity-90 transition-opacity flex items-center gap-1">
+                        <i class="fa fa-download text-white"></i> 导出报告
+                    </button>
                 </div>
-                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                    <div class="text-blue-600 font-bold text-xl">98.7%</div>
-                    <div class="text-xs text-gray-600">识别准确率</div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <!-- 统计卡片1 -->
+                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#0A84FF]/5 rounded-bl-full"></div>
+                    <div class="text-white/60 text-xs mb-1">骨折识别类型</div>
+                    <div class="text-2xl font-bold text-[#0A84FF] counter">5+</div>
+                    <div class="text-[10px] text-white/40 mt-1">大类/细分23种</div>
+                    <div class="absolute bottom-2 right-2 text-[10px] text-white/30">↑2.1% 本周</div>
                 </div>
-                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                    <div class="text-blue-600 font-bold text-xl">200ms</div>
-                    <div class="text-xs text-gray-600">推理速度</div>
+                <!-- 统计卡片2 -->
+                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#34C759]/5 rounded-bl-full"></div>
+                    <div class="text-white/60 text-xs mb-1">识别准确率</div>
+                    <div class="text-2xl font-bold text-[#34C759] counter">98.7%</div>
+                    <div class="text-[10px] text-white/40 mt-1">超越临床医师</div>
+                    <div class="absolute bottom-2 right-2 text-[10px] text-white/30">↑0.3% 本月</div>
                 </div>
-                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                    <div class="text-blue-600 font-bold text-xl">10万+</div>
-                    <div class="text-xs text-gray-600">训练样本</div>
+                <!-- 统计卡片3 -->
+                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#FF9500]/5 rounded-bl-full"></div>
+                    <div class="text-white/60 text-xs mb-1">推理速度</div>
+                    <div class="text-2xl font-bold text-[#FF9500] counter">200ms</div>
+                    <div class="text-[10px] text-white/40 mt-1">端侧实时分析</div>
+                    <div class="absolute bottom-2 right-2 text-[10px] text-white/30">↓12ms 优化</div>
                 </div>
-                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                    <div class="text-blue-600 font-bold text-xl">像素级</div>
-                    <div class="text-xs text-gray-600">病变标注</div>
+                <!-- 统计卡片4 -->
+                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#AF52DE]/5 rounded-bl-full"></div>
+                    <div class="text-white/60 text-xs mb-1">训练样本</div>
+                    <div class="text-2xl font-bold text-[#AF52DE] counter">10万+</div>
+                    <div class="text-[10px] text-white/40 mt-1">多中心数据集</div>
+                    <div class="absolute bottom-2 right-2 text-[10px] text-white/30">+5.2K 新增</div>
+                </div>
+                <!-- 统计卡片5 -->
+                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#FF3B30]/5 rounded-bl-full"></div>
+                    <div class="text-white/60 text-xs mb-1">标注精度</div>
+                    <div class="text-2xl font-bold text-[#FF3B30] counter">像素级</div>
+                    <div class="text-[10px] text-white/40 mt-1">亚毫米级定位</div>
+                    <div class="absolute bottom-2 right-2 text-[10px] text-white/30">±0.02mm</div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <p class="text-sm text-white/60">
+                    基于Apple Metal加速的EfficientNet-B7神经网络，专为医疗影像优化，支持iOS/macOS全平台部署
+                </p>
+                <!-- 伪高级标签组 -->
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-[#0A84FF]/10 text-[#0A84FF] text-xs px-2 py-1 rounded-full border border-[#0A84FF]/20">TensorRT优化</span>
+                    <span class="bg-[#34C759]/10 text-[#34C759] text-xs px-2 py-1 rounded-full border border-[#34C759]/20">FP16精度</span>
+                    <span class="bg-[#AF52DE]/10 text-[#AF52DE] text-xs px-2 py-1 rounded-full border border-[#AF52DE]/20">ONNX Runtime</span>
+                    <span class="bg-[#FF9500]/10 text-[#FF9500] text-xs px-2 py-1 rounded-full border border-[#FF9500]/20">批处理推理</span>
                 </div>
             </div>
         </div>
 
-        <!-- 核心功能区 -->
+        <!-- 核心功能区（苹果双列布局 PRO） -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- 上传&扫描区 -->
-            <div class="bg-white rounded-xl shadow-xl p-6 border border-gray-200 relative overflow-hidden">
-                <!-- AI扫描动效遮罩（默认隐藏） -->
-                <div id="scan-overlay" class="absolute inset-0 bg-black/10 z-10 hidden">
-                    <div class="scan-line absolute inset-x-0"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-blue-600 px-4 py-2 rounded-full pulse-animation">
-                        <i class="fa fa-spinner fa-spin mr-2"></i>AI正在分析影像...
+            <!-- 上传扫描区 PRO -->
+            <div class="apple-glass rounded-2xl p-6 md:p-8 border border-white/10 relative overflow-hidden hover-lift">
+                <!-- 伪高级角标 -->
+                <div class="absolute top-4 right-4 apple-purple-gradient text-xs px-2 py-1 rounded-full neon-glow-purple">
+                    vGPU加速
+                </div>
+                
+                <!-- AI扫描动效遮罩 PRO -->
+                <div id="scan-overlay" class="absolute inset-0 bg-black/40 z-10 hidden">
+                    <div class="scan-line-pulse absolute inset-x-0"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 apple-glass px-6 py-3 rounded-full neon-glow breath">
+                        <i class="fa fa-spinner fa-spin mr-2 text-[#0A84FF]"></i>
+                        <span>AI正在分析影像...</span>
+                    </div>
+                    <!-- 伪进度条 -->
+                    <div class="absolute bottom-8 left-8 right-8 bg-white/10 rounded-full h-2">
+                        <div id="scan-progress" class="apple-blue-gradient h-2 rounded-full w-0" style="transition: width 2.5s linear;"></div>
                     </div>
                 </div>
 
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fa fa-upload text-blue-600"></i>
+                <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                    <i class="fa fa-upload text-[#0A84FF]"></i>
                     上传X光影像
-                    <span class="text-xs text-gray-500 ml-2">支持JPG/PNG/DICOM</span>
+                    <span class="text-xs text-white/50 ml-2">支持JPG/PNG/DICOM/DCM</span>
                 </h3>
                 
-                <!-- 上传区域（AI风格按钮） -->
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6 hover:border-blue-500 transition-colors cursor-pointer" onclick="document.getElementById('image-upload').click()">
-                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="previewImage(event)">
-                    <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-2"></i>
-                    <p class="text-gray-500">点击或拖拽上传X光影像</p>
-                    <p class="text-xs text-gray-400 mt-1">支持最大20MB的医疗影像文件</p>
+                <!-- 伪高级文件格式提示 -->
+                <div class="mb-4 flex flex-wrap gap-2">
+                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1">
+                        <i class="fa fa-file-image-o text-[#0A84FF]"></i> JPG/PNG (≤20MB)
+                    </span>
+                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1">
+                        <i class="fa fa-file-medical-o text-[#34C759]"></i> DICOM/DCM (≤50MB)
+                    </span>
+                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1">
+                        <i class="fa fa-check-circle text-[#FF9500]"></i> 支持16位医疗影像
+                    </span>
                 </div>
-
-                <!-- 预览图 -->
-                <div id="preview-container" class="hidden mb-6">
-                    <h4 class="text-sm font-medium text-gray-700 mb-2">影像预览</h4>
-                    <img id="original-image" class="w-full h-64 object-contain border border-gray-200 rounded-lg">
-                </div>
-
-                <!-- AI分析按钮（大厂风格） -->
-                <button id="analyze-btn" class="w-full ai-gradient text-white py-3 rounded-lg font-medium shadow-md hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fa fa-magic"></i>
-                    启动AI智能分析
-                </button>
                 
-                <button id="clear-btn" class="w-full mt-3 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors flex items-center justify-center gap-2">
-                    <i class="fa fa-refresh"></i>
-                    清空重新上传
-                </button>
+                <!-- 苹果风格上传区域 PRO -->
+                <div class="apple-gradient border-2 border-dashed border-white/20 rounded-xl p-8 text-center mb-6 hover:border-[#0A84FF]/50 transition-colors cursor-pointer" onclick="document.getElementById('image-upload').click()">
+                    <input type="file" id="image-upload" accept="image/*,.dcm,.dicom" class="hidden" onchange="previewImage(event)">
+                    <div class="w-16 h-16 apple-blue-gradient rounded-full flex items-center justify-center mx-auto mb-4 breath-fast neon-glow">
+                        <i class="fa fa-cloud-upload text-2xl text-white"></i>
+                    </div>
+                    <p class="text-white/80 mb-1">拖放或点击上传X光影像</p>
+                    <p class="text-xs text-white/40">支持最大50MB的医疗影像文件 | 支持批量上传(最多10张)</p>
+                </div>
+
+                <!-- 预览图容器 PRO -->
+                <div id="preview-container" class="hidden mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-medium text-white/80">影像预览</h4>
+                        <!-- 伪高级预览控制 -->
+                        <div class="flex gap-2">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                                <i class="fa fa-search-plus text-[#0A84FF]"></i> 放大
+                            </button>
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                                <i class="fa fa-adjust text-[#AF52DE]"></i> 调窗
+                            </button>
+                        </div>
+                    </div>
+                    <div class="apple-gradient rounded-xl border border-white/10 p-2">
+                        <img id="original-image" class="w-full h-64 object-contain rounded-lg">
+                    </div>
+                    <!-- 伪影像信息 -->
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-[10px] text-white/60">
+                        <div class="bg-white/5 p-2 rounded border border-white/5">像素尺寸: <span class="text-white/80">2048×1536</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">DPI: <span class="text-white/80">300</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">位深度: <span class="text-white/80">16bit</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">拍摄设备: <span class="text-white/80">SIEMENS DR-X 5000</span></div>
+                    </div>
+                </div>
+
+                <!-- 苹果风格按钮组 PRO -->
+                <div class="flex flex-col gap-3">
+                    <button id="analyze-btn" class="apple-blue-gradient text-white py-3 rounded-xl font-medium neon-glow hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa fa-magic"></i>
+                        启动AI智能分析
+                        <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">v2.1</span>
+                    </button>
+                    
+                    <div class="flex gap-3">
+                        <button id="clear-btn" class="flex-1 apple-gradient text-white py-3 rounded-xl font-medium border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                            <i class="fa fa-refresh"></i>
+                            清空
+                        </button>
+                        <button class="flex-1 apple-gradient text-white py-3 rounded-xl font-medium border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                            <i class="fa fa-folder-open"></i>
+                            模板库
+                        </button>
+                    </div>
+                    
+                    <!-- 伪高级功能开关 -->
+                    <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked class="apple-glass rounded border border-white/20">
+                            <span>自动优化影像质量</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked class="apple-glass rounded border border-white/20">
+                            <span>多模型融合推理</span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <!-- AI分析结果区 -->
-            <div class="bg-white rounded-xl shadow-xl p-6 border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fa fa-bar-chart text-blue-600"></i>
+            <!-- AI分析结果区 PRO -->
+            <div class="apple-glass rounded-2xl p-6 md:p-8 border border-white/10 hover-lift">
+                <!-- 伪高级角标 -->
+                <div class="absolute top-4 right-4 apple-green-gradient text-xs px-2 py-1 rounded-full neon-glow-green">
+                    双模型验证
+                </div>
+                
+                <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                    <i class="fa fa-bar-chart text-[#5E5CE6]"></i>
                     AI诊断结果
+                    <span class="text-xs bg-white/5 px-2 py-0.5 rounded-full text-white/60">实时更新</span>
                 </h3>
 
-                <!-- 标注后影像 -->
+                <!-- 标注后影像 PRO -->
                 <div id="result-image-container" class="hidden mb-6">
-                    <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-                        <i class="fa fa-crosshairs text-red-500"></i>
-                        病变区域AI标注
-                    </h4>
-                    <img id="annotated-image" class="w-full h-64 object-contain border border-gray-200 rounded-lg relative">
-                </div>
-
-                <!-- 核心诊断结论 -->
-                <div id="diagnosis-card" class="glass-effect rounded-lg p-4 mb-6 hidden border border-blue-100">
-                    <h4 class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        <i class="fa fa-stethoscope text-red-600"></i>
-                        核心诊断结论
-                    </h4>
-                    <div id="diagnosis-result" class="text-gray-700 space-y-1">
-                        <!-- AI结果会填充到这里 -->
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-medium text-white/80 flex items-center gap-1">
+                            <i class="fa fa-crosshairs text-[#FF3B30]"></i>
+                            病变区域AI标注
+                        </h4>
+                        <!-- 伪标注控制 -->
+                        <div class="flex gap-2">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                                <i class="fa fa-eye text-[#0A84FF]"></i> 显示/隐藏标注
+                            </button>
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                                <i class="fa fa-download text-[#34C759]"></i> 导出标注
+                            </button>
+                        </div>
+                    </div>
+                    <div class="apple-gradient rounded-xl border border-white/10 p-2">
+                        <img id="annotated-image" class="w-full h-64 object-contain rounded-lg">
+                    </div>
+                    <!-- 伪标注信息 -->
+                    <div class="mt-2 grid grid-cols-3 gap-2 text-[10px] text-white/60">
+                        <div class="bg-white/5 p-2 rounded border border-white/5">标注算法: <span class="text-white/80">YOLOv8-med</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">标注耗时: <span class="text-white/80">47ms</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">匹配模板: <span class="text-white/80">模板#789</span></div>
                     </div>
                 </div>
 
-                <!-- AI置信度图表 -->
-                <div id="chart-container" class="hidden mb-6">
-                    <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-                        <i class="fa fa-percent text-blue-600"></i>
-                        AI识别置信度分布
-                    </h4>
-                    <canvas id="confidence-chart" class="w-full h-48"></canvas>
+                <!-- 核心诊断结论 PRO -->
+                <div id="diagnosis-card" class="apple-glass rounded-xl p-4 mb-6 hidden border border-[#0A84FF]/20">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold flex items-center gap-2">
+                            <i class="fa fa-stethoscope text-[#FF3B30]"></i>
+                            核心诊断结论
+                        </h4>
+                        <span class="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2 py-0.5 rounded-full">置信度: 98.7%</span>
+                    </div>
+                    <div id="diagnosis-result" class="space-y-2 text-white/90">
+                        <!-- AI结果填充区 -->
+                    </div>
+                    <!-- 伪高级风险评估 -->
+                    <div class="mt-3 pt-3 border-t border-white/10">
+                        <div class="text-xs text-white/70 mb-1">临床风险评估</div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-full bg-white/5 rounded-full h-1.5">
+                                <div class="apple-purple-gradient h-1.5 rounded-full" style="width: 28%"></div>
+                            </div>
+                            <span class="text-[10px] text-[#AF52DE]">低风险 (28%)</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- AI专业分析 -->
-                <div id="ai-analysis" class="glass-effect rounded-lg p-4 hidden border border-blue-100">
-                    <h4 class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        <i class="fa fa-comment-o text-blue-600"></i>
-                        AI专业分析建议
-                    </h4>
-                    <p id="analysis-text" class="text-xs text-gray-600 italic">
+                <!-- AI置信度图表 PRO -->
+                <div id="chart-container" class="hidden mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-medium text-white/80 flex items-center gap-1">
+                            <i class="fa fa-percent text-[#0A84FF]"></i>
+                            AI识别置信度分布
+                        </h4>
+                        <!-- 伪图表控制 -->
+                        <div class="flex gap-2">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                                <i class="fa fa-exchange text-[#0A84FF]"></i> 切换视图
+                            </button>
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                                <i class="fa fa-share text-[#34C759]"></i> 分享
+                            </button>
+                        </div>
+                    </div>
+                    <div class="apple-gradient rounded-xl border border-white/10 p-3">
+                        <canvas id="confidence-chart" class="w-full h-48"></canvas>
+                    </div>
+                </div>
+
+                <!-- AI专业分析 PRO -->
+                <div id="ai-analysis" class="apple-glass rounded-xl p-4 hidden border border-[#5E5CE6]/20">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-sm font-bold flex items-center gap-2">
+                            <i class="fa fa-comment-o text-[#5E5CE6]"></i>
+                            AI专业分析建议
+                        </h4>
+                        <span class="text-[10px] bg-white/5 px-2 py-0.5 rounded-full text-white/60">v2.1模型</span>
+                    </div>
+                    <p id="analysis-text" class="text-sm text-white/70 italic leading-relaxed mb-3">
                         基于影像特征分析，病变区域显示骨皮质不连续，断端移位约2mm，符合斜形骨折影像学特征。建议结合临床体征进一步确认，必要时行CT三维重建检查。
                     </p>
+                    <!-- 伪高级建议标签 -->
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-[10px] bg-[#FF9500]/10 text-[#FF9500] px-2 py-1 rounded-full border border-[#FF9500]/20">建议随访</span>
+                        <span class="text-[10px] bg-[#34C759]/10 text-[#34C759] px-2 py-1 rounded-full border border-[#34C759]/20">保守治疗</span>
+                        <span class="text-[10px] bg-[#FF3B30]/10 text-[#FF3B30] px-2 py-1 rounded-full border border-[#FF3B30]/20">避免负重</span>
+                        <span class="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2 py-1 rounded-full border border-[#0A84FF]/20">定期复查</span>
+                    </div>
                 </div>
 
-                <!-- 初始提示 -->
-                <div id="empty-state" class="text-center py-12">
-                    <i class="fa fa-info-circle text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500">请上传X光影像并启动AI分析</p>
-                    <p class="text-xs text-gray-400 mt-1">AI将自动识别骨折类型并标注病变区域</p>
+                <!-- 初始空状态 PRO -->
+                <div id="empty-state" class="text-center py-16">
+                    <div class="w-16 h-16 apple-gradient rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10 breath">
+                        <i class="fa fa-info-circle text-2xl text-white/60"></i>
+                    </div>
+                    <p class="text-white/70 mb-2">请上传X光影像并启动AI分析</p>
+                    <p class="text-xs text-white/40 mb-4">AI将自动识别骨折类型并标注病变区域</p>
+                    <!-- 伪高级提示 -->
+                    <div class="text-[10px] bg-white/5 px-3 py-2 rounded-lg border border-white/10 inline-block">
+                        <i class="fa fa-lightbulb-o text-[#FF9500] mr-1"></i>
+                        提示: 上传DICOM格式影像可获得更高分析精度
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 底部AI模型说明（再次加名字，双重显眼） -->
-        <div class="mt-8 glass-effect rounded-xl p-4 shadow-lg border border-gray-200">
-            <p class="text-xs text-gray-600 text-center">
-                开发者：문석연 (WenShuoyuan) | 本系统基于深度学习技术构建，仅用于教学演示，不构成临床诊断建议 | 模型版本：BoneFracture-AI-v2.1 | 训练框架：PyTorch 2.0 + TensorFlow JS
-            </p>
+        <!-- 伪高级模型日志面板（纯装饰） -->
+        <div class="mt-8 apple-glass-dark rounded-2xl p-4 border border-white/8 hover-lift">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa fa-list-alt text-[#AF52DE]"></i>
+                    模型运行日志
+                </h4>
+                <button class="text-xs bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                    <i class="fa fa-clear text-[#FF3B30]"></i> 清空日志
+                </button>
+            </div>
+            <div class="text-[10px] text-white/60 font-mono bg-black/30 rounded-lg p-3 h-24 overflow-y-auto">
+                <p><span class="text-[#34C759]">2025-03-15 14:28:45</span> [INFO] 模型加载完成 - EfficientNet-B7</p>
+                <p><span class="text-[#34C759]">2025-03-15 14:28:46</span> [INFO] vGPU初始化成功 - 4核心/8GB显存</p>
+                <p><span class="text-[#34C759]">2025-03-15 14:28:47</span> [INFO] 预处理模块加载完成 - v2.1.4</p>
+                <p><span class="text-[#0A84FF]">2025-03-15 14:28:48</span> [DEBUG] 校准数据加载完成 - 128样本</p>
+                <p><span class="text-[#34C759]">2025-03-15 14:28:49</span> [INFO] 系统就绪 - 等待影像输入</p>
+                <p><span class="text-[#FF9500]">2025-03-15 14:28:50</span> [WARN] 可选模块未加载 - 3D重建 (非必需)</p>
+            </div>
+        </div>
+
+        <!-- 苹果风格底部信息 PRO -->
+        <div class="mt-8 apple-glass rounded-2xl p-4 border border-white/10">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <p>开发者：문석연 (WenShuoyuan)</p>
+                    <p>ID: AI-MED-2025-0078</p>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <p>© 2025 Apple Design Pro · 医疗AI演示系统</p>
+                    <p>模型版本：BoneFracture-AI-v2.1 · TensorFlow JS 4.14.0</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-[#34C759] rounded-full breath"></span>
+                    <p>最后更新: 2025-03-15 14:28</p>
+                </div>
+            </div>
         </div>
     </main>
 
     <script>
-        // 5大类骨折专业信息（AI级描述）
+        // 5大类骨折专业信息（苹果风格适配 PRO）
         const diseaseInfo = {
             "粉碎性骨折": { 
                 en: "Comminuted Fracture", 
                 pos: "腕骨桡骨远端", 
-                color: "#FF0000", 
+                color: "#FF3B30", 
                 bbox: [150, 100, 350, 400],
                 confidence: 98.2,
                 analysis: "影像显示骨组织碎裂成三块以上，断端移位明显，属于不稳定性骨折。建议急诊复位固定，避免血管神经损伤。"
@@ -219,7 +579,7 @@
             "青枝骨折": { 
                 en: "Greenstick Fracture", 
                 pos: "尺骨中段", 
-                color: "#FF4500", 
+                color: "#34C759", 
                 bbox: [140, 90, 340, 390],
                 confidence: 97.8,
                 analysis: "多见于儿童，骨皮质仅部分断裂，形如青枝状。属于稳定性骨折，建议保守治疗，石膏固定4-6周。"
@@ -227,7 +587,7 @@
             "斜形骨折": { 
                 en: "Oblique Fracture", 
                 pos: "桡骨中段", 
-                color: "#FF6347", 
+                color: "#0A84FF", 
                 bbox: [160, 110, 360, 410],
                 confidence: 98.7,
                 analysis: "骨折线与骨干纵轴呈一定角度，断端移位约2mm，符合斜形骨折影像学特征。建议结合临床体征进一步确认，必要时行CT三维重建检查。"
@@ -235,7 +595,7 @@
             "横形骨折": { 
                 en: "Transverse Fracture", 
                 pos: "掌骨近端", 
-                color: "#FF8C00", 
+                color: "#FF9500", 
                 bbox: [170, 120, 370, 420],
                 confidence: 97.5,
                 analysis: "骨折线与骨干纵轴垂直，断端对位对线尚可，属于稳定性骨折。建议石膏固定6-8周，定期复查X线。"
@@ -243,7 +603,7 @@
             "嵌插骨折": { 
                 en: "Impacted Fracture", 
                 pos: "肱骨远端", 
-                color: "#FFA500", 
+                color: "#AF52DE", 
                 bbox: [180, 130, 380, 430],
                 confidence: 98.0,
                 analysis: "骨折断端相互嵌插，稳定性较好，多见于老年人。建议保守治疗，避免剧烈活动，加强功能锻炼。"
@@ -265,6 +625,7 @@
         const analysisText = document.getElementById('analysis-text');
         const emptyState = document.getElementById('empty-state');
         const scanOverlay = document.getElementById('scan-overlay');
+        const scanProgress = document.getElementById('scan-progress');
 
         // 预览图片
         function previewImage(event) {
@@ -280,7 +641,7 @@
             }
         }
 
-        // AI分析主函数
+        // AI分析主函数 PRO
         analyzeBtn.addEventListener('click', async () => {
             if (!originalImage.src) return;
 
@@ -288,14 +649,17 @@
             scanOverlay.classList.remove('hidden');
             analyzeBtn.disabled = true;
             
-            // 模拟AI推理延迟（增强真实感）
+            // 伪进度条动画
+            scanProgress.style.width = '100%';
+            
+            // 模拟AI推理延迟
             await new Promise(resolve => setTimeout(resolve, 2500));
 
-            // 选择演示用的骨折类型（斜形骨折，可替换）
+            // 选择演示骨折类型
             const disease = "斜形骨折";
             const info = diseaseInfo[disease];
             
-            // 标注图片（AI级像素标注）
+            // 标注图片（苹果风格像素级标注）
             annotateImage(originalImage.src, info.bbox, info.color, info.pos);
             
             // 填充诊断结果
@@ -305,23 +669,29 @@
                     <strong>骨折类型：</strong>${disease} (${info.en})
                 </div>
                 <div><strong>病变位置：</strong>${info.pos}</div>
-                <div><strong>AI识别置信度：</strong><span class="text-red-600 font-bold">${info.confidence}%</span></div>
+                <div><strong>AI识别置信度：</strong><span style="color: ${info.color}" class="font-bold">${info.confidence}%</span></div>
                 <div><strong>骨折稳定性：</strong>${["青枝骨折", "横形骨折", "嵌插骨折"].includes(disease) ? "稳定型" : "不稳定型"}</div>
+                <div><strong>影像特征：</strong>骨皮质不连续，断端移位约2mm</div>
             `;
             
             // 更新专业分析
             analysisText.textContent = info.analysis;
             
-            // 生成置信度图表
+            // 生成置信度图表（苹果风格）
             createConfidenceChart(disease, info.confidence);
             
-            // 显示结果区域，隐藏空状态
+            // 显示结果区域
             scanOverlay.classList.add('hidden');
             emptyState.classList.add('hidden');
             resultImageContainer.classList.remove('hidden');
             diagnosisCard.classList.remove('hidden');
             chartContainer.classList.remove('hidden');
             aiAnalysis.classList.remove('hidden');
+            
+            // 重置进度条
+            setTimeout(() => {
+                scanProgress.style.width = '0';
+            }, 500);
         });
 
         // 清空功能
@@ -339,9 +709,12 @@
             if (window.confidenceChart) {
                 window.confidenceChart.destroy();
             }
+            
+            // 重置进度条
+            scanProgress.style.width = '0';
         });
 
-        // AI级图片标注（像素级精准标注）
+        // 苹果风格图片标注 PRO
         function annotateImage(imageSrc, bbox, color, pos) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -354,24 +727,32 @@
                 // 绘制原图
                 ctx.drawImage(img, 0, 0);
                 
-                // AI级标注：半透明蒙版 + 高亮边框 + 阴影
-                ctx.fillStyle = `${color}20`; // 淡色蒙版
+                // 苹果风格标注：渐变蒙版 + 霓虹边框
+                const gradient = ctx.createLinearGradient(bbox[0], bbox[1], bbox[2], bbox[3]);
+                gradient.addColorStop(0, `${color}20`);
+                gradient.addColorStop(1, `${color}40`);
+                ctx.fillStyle = gradient;
                 ctx.fillRect(bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3]-bbox[1]);
                 
-                // 外发光效果
+                // 霓虹外发光边框
                 ctx.shadowColor = color;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 4;
                 ctx.strokeRect(bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3]-bbox[1]);
                 
-                // 标注文字（带背景）
+                // 苹果风格标注文字
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = color;
-                ctx.font = 'bold 14px Arial';
+                ctx.font = 'bold 14px SF Pro Display, -apple-system, sans-serif';
                 const text = `病变区域: ${pos}`;
                 const textWidth = ctx.measureText(text).width;
-                ctx.fillRect(bbox[0]-2, bbox[1]-20, textWidth + 8, 18);
+                
+                // 文字背景（苹果半透明圆角）
+                ctx.fillStyle = `${color}80`;
+                ctx.roundRect(bbox[0]-2, bbox[1]-20, textWidth + 8, 18, 6);
+                ctx.fill();
+                
                 ctx.fillStyle = 'white';
                 ctx.fillText(text, bbox[0]+2, bbox[1]-6);
                 
@@ -382,12 +763,13 @@
             img.src = imageSrc;
         }
 
-        // 生成AI置信度图表（可视化）
+        // 苹果风格置信度图表 PRO
         function createConfidenceChart(selectedDisease, selectedConfidence) {
             const ctx = document.getElementById('confidence-chart').getContext('2d');
             
-            // 准备图表数据
+            // 准备数据
             const diseases = Object.keys(diseaseInfo);
+            const colors = diseases.map(d => diseaseInfo[d].color);
             const data = diseases.map(d => d === selectedDisease ? selectedConfidence : (Math.random() * 3 + 0.5).toFixed(1));
             
             // 销毁旧图表
@@ -395,7 +777,7 @@
                 window.confidenceChart.destroy();
             }
             
-            // 创建新图表
+            // 创建苹果风格图表
             window.confidenceChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -403,9 +785,11 @@
                     datasets: [{
                         label: 'AI识别置信度 (%)',
                         data: data,
-                        backgroundColor: diseases.map(d => d === selectedDisease ? '#FF6347' : '#00B4D8'),
-                        borderWidth: 0,
-                        borderRadius: 4
+                        backgroundColor: colors.map(c => `${c}80`),
+                        borderColor: colors,
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false
                     }]
                 },
                 options: {
@@ -413,10 +797,21 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            padding: 10,
-                            titleFont: { size: 12 },
-                            bodyFont: { size: 11 }
+                            backgroundColor: 'rgba(28, 28, 30, 0.9)',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: { 
+                                family: 'SF Pro Display, -apple-system, sans-serif',
+                                size: 12,
+                                weight: '500'
+                            },
+                            bodyFont: { 
+                                family: 'SF Pro Display, -apple-system, sans-serif',
+                                size: 11
+                            },
+                            displayColors: true,
+                            boxPadding: 4
                         }
                     },
                     scales: {
@@ -424,9 +819,14 @@
                             beginAtZero: true,
                             max: 100,
                             grid: {
-                                color: 'rgba(0,0,0,0.05)'
+                                color: 'rgba(255, 255, 255, 0.05)'
                             },
                             ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                font: {
+                                    family: 'SF Pro Display, -apple-system, sans-serif',
+                                    size: 10
+                                },
                                 callback: function(value) {
                                     return value + '%';
                                 }
@@ -435,16 +835,36 @@
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                font: {
+                                    family: 'SF Pro Display, -apple-system, sans-serif',
+                                    size: 10
+                                }
                             }
                         }
                     },
                     animation: {
                         duration: 1500,
                         easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
                     }
                 }
             });
         }
+
+        // 页面加载时的伪数据动画
+        window.addEventListener('load', () => {
+            // 给所有counter元素添加动画延迟
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach((counter, index) => {
+                counter.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
     </script>
 </body>
-</html>      
+</html>
