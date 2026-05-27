@@ -10,12 +10,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
     
+    <!-- 引入Apple SF Pro字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- 苹果暗黑风格定制 PRO版 -->
     <style type="text/tailwindcss">
         @layer utilities {
             /* 苹果深空黑渐变 PRO */
             .apple-gradient {
                 background: linear-gradient(135deg, #121212 0%, #1E1E1E 100%);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
             }
             .apple-blue-gradient {
                 background: linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%);
@@ -31,6 +35,7 @@
                 backdrop-filter: blur(20px);
                 background-color: rgba(28, 28, 30, 0.7);
                 border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
             }
             .apple-glass-dark {
                 backdrop-filter: blur(30px);
@@ -39,7 +44,9 @@
             }
             /* 霓虹光效 PRO */
             .neon-glow {
-                box-shadow: 0 0 15px rgba(10, 132, 255, 0.5), 0 0 30px rgba(94, 92, 230, 0.3);
+                box-shadow: 0 0 12px rgba(10, 132, 255, 0.4), 
+                            0 0 24px rgba(94, 92, 230, 0.2),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.1);
             }
             .neon-glow-purple {
                 box-shadow: 0 0 15px rgba(175, 82, 222, 0.5), 0 0 30px rgba(94, 92, 230, 0.3);
@@ -110,17 +117,152 @@
                     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
                 background-size: 20px 20px;
             }
+            /* Apple风格按钮按压反馈 */
+            .apple-btn {
+                transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            .apple-btn:active {
+                transform: translateY(1px) scale(0.98);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+            }
+            /* 渐入动画 */
+            .fade-in {
+                animation: fadeIn 0.5s ease forwards;
+                opacity: 0;
+            }
+            @keyframes fadeIn {
+                to { opacity: 1; }
+            }
+            /* 吐司提示 */
+            .error-toast {
+                background-color: rgba(255, 59, 48, 0.9);
+                border: 1px solid rgba(255, 59, 48, 0.3);
+                animation: slideIn 0.3s ease forwards;
+            }
+            .success-toast {
+                background-color: rgba(52, 199, 89, 0.9);
+                border: 1px solid rgba(52, 199, 89, 0.3);
+                animation: slideIn 0.3s ease forwards;
+            }
+            @keyframes slideIn {
+                from { transform: translateY(10px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            /* 医疗影像专用背景（模拟阅片灯箱） */
+            .image-viewer-bg {
+                background: linear-gradient(45deg, #0f172a 0%, #1e293b 100%);
+                background-image: 
+                    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+                background-size: 40px 40px;
+            }
+            /* 影像预览区样式优化 */
+            .image-preview-container {
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+                overflow: hidden;
+                position: relative;
+            }
+            /* Apple风格加载骨架屏 */
+            .skeleton-loader {
+                background: linear-gradient(90deg, 
+                    rgba(28, 28, 30, 0.8) 0%, 
+                    rgba(40, 40, 42, 0.8) 50%, 
+                    rgba(28, 28, 30, 0.8) 100%);
+                background-size: 200% 100%;
+                animation: skeleton-loading 1.5s infinite;
+            }
+            @keyframes skeleton-loading {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+            /* DICOM文件专属标识 */
+            .dicom-badge {
+                background: linear-gradient(135deg, #34C759 0%, #0A84FF 100%);
+                color: white;
+                font-weight: 500;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+            /* 医疗影像窗宽窗位调节滑块 */
+            .医疗-slider {
+                -webkit-appearance: none;
+                width: 100%;
+                height: 4px;
+                border-radius: 2px;
+                background: rgba(255, 255, 255, 0.1);
+                outline: none;
+            }
+            .医疗-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: #0A84FF;
+                cursor: pointer;
+                box-shadow: 0 0 8px rgba(10, 132, 255, 0.5);
+                transition: all 0.2s ease;
+            }
+            .医疗-slider::-webkit-slider-thumb:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 12px rgba(10, 132, 255, 0.7);
+            }
+            /* 移动端适配优化 */
+            @media (max-width: 768px) {
+                .mobile-hide {
+                    display: none !important;
+                }
+                .mobile-text-sm {
+                    font-size: 0.75rem !important;
+                }
+                .mobile-p-2 {
+                    padding: 0.5rem !important;
+                }
+                /* 移动端灵动岛调整 */
+                #dynamic-island {
+                    top: 12px;
+                    width: calc(100% - 32px) !important;
+                    border-radius: 12px;
+                }
+                /* 移动端影像预览区优化 */
+                .image-preview-container {
+                    height: 300px !important;
+                }
+                /* 移动端卡片间距优化 */
+                .apple-glass {
+                    padding: 16px !important;
+                    margin-bottom: 16px !important;
+                }
+                /* 移动端按钮全屏宽度 */
+                .apple-btn {
+                    width: 100%;
+                    padding: 12px 0 !important;
+                }
+            }
         }
     </style>
 </head>
-<body class="bg-[#0F0F11] min-h-screen text-[#F5F5F7] font-sans grid-bg">
+<body class="bg-[#0F0F11] min-h-screen text-[#F5F5F7] font-['SF_Pro_Display',-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif] grid-bg" letter-spacing="-0.02em">
+    <!-- 灵动岛风格状态提示 -->
+    <div id="dynamic-island" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 apple-glass-dark rounded-full px-4 py-2 flex items-center gap-3 neon-glow hidden">
+        <div class="w-2 h-2 bg-[#0A84FF] rounded-full animate-pulse"></div>
+        <span id="island-text" class="text-sm">AI正在分析影像...</span>
+        <div class="w-20 h-1 bg-white/20 rounded-full overflow-hidden">
+            <div id="island-progress" class="h-full bg-[#0A84FF] w-0 transition-all duration-300"></div>
+        </div>
+    </div>
+
+    <!-- 吐司提示容器 -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
     <!-- 顶部系统状态栏（伪高级装饰） -->
-    <div class="apple-glass-dark border-b border-white/5 px-6 py-1 text-xs flex justify-between items-center">
-        <div class="flex items-center gap-4">
+    <div class="apple-glass-dark border-b border-white/5 px-4 md:px-6 py-1 text-xs flex justify-between items-center mobile-hide">
+        <div class="flex items-center gap-2 md:gap-4">
             <span class="flex items-center gap-1"><i class="fa fa-server text-[#34C759]"></i> 服务器负载: 18.7%</span>
             <span class="flex items-center gap-1"><i class="fa fa-database text-[#0A84FF]"></i> 显存占用: 4.2/16GB</span>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 md:gap-4">
             <span class="flex items-center gap-1"><i class="fa fa-tachometer text-[#FF9500]"></i> 推理速度: 198ms</span>
             <span class="flex items-center gap-1"><i class="fa fa-shield text-[#AF52DE]"></i> 安全等级: SSS</span>
         </div>
@@ -128,16 +270,16 @@
 
     <!-- 顶部苹果风格导航栏 PRO -->
     <header class="apple-gradient sticky top-0 z-50 border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-6 md:px-8 py-4">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
                 <!-- 左侧Logo区域 PRO -->
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 apple-blue-gradient rounded-full flex items-center justify-center breath-fast neon-glow">
-                        <i class="fa fa-brain text-xl text-white"></i>
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 apple-blue-gradient rounded-full flex items-center justify-center breath-fast neon-glow">
+                        <i class="fa fa-brain text-lg md:text-xl text-white"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl md:text-2xl font-semibold tracking-tight">AI骨科骨折智能诊断系统</h1>
-                        <div class="flex items-center gap-3 text-xs text-white/60">
+                        <h1 class="text-lg md:text-xl font-semibold tracking-tight mobile-text-sm">AI骨科骨折智能诊断系统</h1>
+                        <div class="flex items-center gap-2 md:gap-3 text-xs text-white/60 mobile-hide">
                             <p>Apple Design Pro · 医疗级v2.1</p>
                             <span class="w-2 h-2 bg-[#34C759] rounded-full breath"></span>
                             <p>运行中 · vGPU加速</p>
@@ -146,19 +288,19 @@
                 </div>
                 
                 <!-- 右侧名字展示（苹果风格卡片 PRO） -->
-                <div class="apple-glass rounded-xl px-4 py-2 flex items-center gap-6 neon-glow">
+                <div class="apple-glass rounded-xl px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-3 md:gap-6 neon-glow w-full md:w-auto justify-center">
                     <div class="flex items-center gap-2">
-                        <i class="fa fa-user-circle text-xl text-[#0A84FF]"></i>
+                        <i class="fa fa-user-circle text-lg md:text-xl text-[#0A84FF]"></i>
                         <span class="font-medium">문석연</span>
                     </div>
-                    <div class="w-px h-6 bg-white/20"></div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa fa-globe text-xl text-[#5E5CE6]"></i>
+                    <div class="w-px h-5 md:h-6 bg-white/20 mobile-hide"></div>
+                    <div class="flex items-center gap-2 mobile-hide">
+                        <i class="fa fa-globe text-lg md:text-xl text-[#5E5CE6]"></i>
                         <span class="font-medium">WenShuoyuan</span>
                     </div>
-                    <div class="w-px h-6 bg-white/20"></div>
+                    <div class="w-px h-5 md:h-6 bg-white/20 mobile-hide"></div>
                     <div class="flex items-center gap-2">
-                        <i class="fa fa-id-card text-xl text-[#34C759]"></i>
+                        <i class="fa fa-id-card text-lg md:text-xl text-[#34C759]"></i>
                         <span class="font-medium text-xs">ID: AI-MED-2025-0078</span>
                     </div>
                 </div>
@@ -167,9 +309,9 @@
     </header>
 
     <!-- 伪高级数据仪表盘（装饰用） -->
-    <div class="max-w-7xl mx-auto px-6 md:px-8 py-4">
-        <div class="apple-glass-dark rounded-2xl p-4 border border-white/8 hover-lift-sm">
-            <div class="grid grid-cols-2 md:grid-cols-8 gap-4">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 md:py-4">
+        <div class="apple-glass-dark rounded-2xl p-3 md:p-4 border border-white/8 hover-lift-sm">
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 md:gap-4">
                 <!-- 伪数据项1 -->
                 <div class="apple-gradient rounded-lg p-2 border border-white/5 flex flex-col items-center hover-lift-sm">
                     <div class="text-white/60 text-xs mb-1">模型迭代次数</div>
@@ -215,70 +357,70 @@
     </div>
 
     <!-- 主内容区 -->
-    <main class="max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-8">
+    <main class="max-w-7xl mx-auto px-4 md:px-8 py-3 md:py-6">
         <!-- 苹果风格统计卡片 PRO -->
-        <div class="apple-glass rounded-2xl p-6 md:p-8 mb-8 hover-lift">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold flex items-center gap-2">
+        <div class="apple-glass rounded-2xl p-4 md:p-6 mb-6 md:mb-8 hover-lift">
+            <div class="flex justify-between items-center mb-4 md:mb-6 flex-wrap gap-2">
+                <h2 class="text-lg md:text-xl font-semibold flex items-center gap-2">
                     <i class="fa fa-microchip text-[#0A84FF]"></i>
                     AI核心性能指标
                 </h2>
                 <!-- 伪高级控制按钮 -->
                 <div class="flex gap-2">
-                    <button class="apple-gradient text-xs px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-1">
+                    <button class="apple-gradient text-xs px-2 md:px-3 py-1 rounded-lg border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-1 apple-btn" onclick="showToast('数据已刷新', 'success')">
                         <i class="fa fa-refresh text-[#0A84FF]"></i> 刷新数据
                     </button>
-                    <button class="apple-blue-gradient text-xs px-3 py-1 rounded-lg neon-glow hover:opacity-90 transition-opacity flex items-center gap-1">
+                    <button class="apple-blue-gradient text-xs px-2 md:px-3 py-1 rounded-lg neon-glow hover:opacity-90 transition-opacity flex items-center gap-1 apple-btn" onclick="exportReport()">
                         <i class="fa fa-download text-white"></i> 导出报告
                     </button>
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
                 <!-- 统计卡片1 -->
-                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#0A84FF]/5 rounded-bl-full"></div>
+                <div class="apple-gradient rounded-xl p-3 md:p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-[#0A84FF]/5 rounded-bl-full"></div>
                     <div class="text-white/60 text-xs mb-1">骨折识别类型</div>
-                    <div class="text-2xl font-bold text-[#0A84FF] counter">5+</div>
+                    <div class="text-xl md:text-2xl font-bold text-[#0A84FF] counter">5+</div>
                     <div class="text-[10px] text-white/40 mt-1">大类/细分23种</div>
                     <div class="absolute bottom-2 right-2 text-[10px] text-white/30">↑2.1% 本周</div>
                 </div>
                 <!-- 统计卡片2 -->
-                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#34C759]/5 rounded-bl-full"></div>
+                <div class="apple-gradient rounded-xl p-3 md:p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-[#34C759]/5 rounded-bl-full"></div>
                     <div class="text-white/60 text-xs mb-1">识别准确率</div>
-                    <div class="text-2xl font-bold text-[#34C759] counter">98.7%</div>
+                    <div class="text-xl md:text-2xl font-bold text-[#34C759] counter">98.7%</div>
                     <div class="text-[10px] text-white/40 mt-1">超越临床医师</div>
                     <div class="absolute bottom-2 right-2 text-[10px] text-white/30">↑0.3% 本月</div>
                 </div>
                 <!-- 统计卡片3 -->
-                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#FF9500]/5 rounded-bl-full"></div>
+                <div class="apple-gradient rounded-xl p-3 md:p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-[#FF9500]/5 rounded-bl-full"></div>
                     <div class="text-white/60 text-xs mb-1">推理速度</div>
-                    <div class="text-2xl font-bold text-[#FF9500] counter">200ms</div>
+                    <div class="text-xl md:text-2xl font-bold text-[#FF9500] counter">200ms</div>
                     <div class="text-[10px] text-white/40 mt-1">端侧实时分析</div>
                     <div class="absolute bottom-2 right-2 text-[10px] text-white/30">↓12ms 优化</div>
                 </div>
                 <!-- 统计卡片4 -->
-                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#AF52DE]/5 rounded-bl-full"></div>
+                <div class="apple-gradient rounded-xl p-3 md:p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-[#AF52DE]/5 rounded-bl-full"></div>
                     <div class="text-white/60 text-xs mb-1">训练样本</div>
-                    <div class="text-2xl font-bold text-[#AF52DE] counter">10万+</div>
+                    <div class="text-xl md:text-2xl font-bold text-[#AF52DE] counter">10万+</div>
                     <div class="text-[10px] text-white/40 mt-1">多中心数据集</div>
                     <div class="absolute bottom-2 right-2 text-[10px] text-white/30">+5.2K 新增</div>
                 </div>
                 <!-- 统计卡片5 -->
-                <div class="apple-gradient rounded-xl p-4 border border-white/10 hover-lift relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-[#FF3B30]/5 rounded-bl-full"></div>
+                <div class="apple-gradient rounded-xl p-3 md:p-4 border border-white/10 hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-[#FF3B30]/5 rounded-bl-full"></div>
                     <div class="text-white/60 text-xs mb-1">标注精度</div>
-                    <div class="text-2xl font-bold text-[#FF3B30] counter">像素级</div>
+                    <div class="text-xl md:text-2xl font-bold text-[#FF3B30] counter">像素级</div>
                     <div class="text-[10px] text-white/40 mt-1">亚毫米级定位</div>
                     <div class="absolute bottom-2 right-2 text-[10px] text-white/30">±0.02mm</div>
                 </div>
             </div>
             
-            <div class="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <p class="text-sm text-white/60">
+            <div class="mt-4 md:mt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
+                <p class="text-sm text-white/60 mobile-text-sm">
                     基于Apple Metal加速的EfficientNet-B7神经网络，专为医疗影像优化，支持iOS/macOS全平台部署
                 </p>
                 <!-- 伪高级标签组 -->
@@ -292,75 +434,80 @@
         </div>
 
         <!-- 核心功能区（苹果双列布局 PRO） -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <!-- 上传扫描区 PRO -->
-            <div class="apple-glass rounded-2xl p-6 md:p-8 border border-white/10 relative overflow-hidden hover-lift">
+            <div class="apple-glass rounded-2xl p-4 md:p-6 border border-white/10 relative overflow-hidden hover-lift">
                 <!-- 伪高级角标 -->
-                <div class="absolute top-4 right-4 apple-purple-gradient text-xs px-2 py-1 rounded-full neon-glow-purple">
+                <div class="absolute top-3 right-3 apple-purple-gradient text-xs px-2 py-1 rounded-full neon-glow-purple">
                     vGPU加速
                 </div>
                 
-                <!-- AI扫描动效遮罩 PRO -->
+                <!-- AI扫描动效遮罩 PRO（保留兼容） -->
                 <div id="scan-overlay" class="absolute inset-0 bg-black/40 z-10 hidden">
                     <div class="scan-line-pulse absolute inset-x-0"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 apple-glass px-6 py-3 rounded-full neon-glow breath">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 apple-glass px-4 md:px-6 py-2 md:py-3 rounded-full neon-glow breath">
                         <i class="fa fa-spinner fa-spin mr-2 text-[#0A84FF]"></i>
-                        <span>AI正在分析影像...</span>
+                        <span id="scan-status">AI正在分析影像...</span>
                     </div>
                     <!-- 伪进度条 -->
-                    <div class="absolute bottom-8 left-8 right-8 bg-white/10 rounded-full h-2">
+                    <div class="absolute bottom-6 left-6 right-6 bg-white/10 rounded-full h-2">
                         <div id="scan-progress" class="apple-blue-gradient h-2 rounded-full w-0" style="transition: width 2.5s linear;"></div>
                     </div>
                 </div>
 
-                <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                <h3 class="text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
                     <i class="fa fa-upload text-[#0A84FF]"></i>
                     上传X光影像
                     <span class="text-xs text-white/50 ml-2">支持JPG/PNG/DICOM/DCM</span>
                 </h3>
                 
                 <!-- 伪高级文件格式提示 -->
-                <div class="mb-4 flex flex-wrap gap-2">
+                <div class="mb-3 md:mb-4 flex flex-wrap gap-2">
                     <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1">
                         <i class="fa fa-file-image-o text-[#0A84FF]"></i> JPG/PNG (≤20MB)
                     </span>
-                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1">
-                        <i class="fa fa-file-medical-o text-[#34C759]"></i> DICOM/DCM (≤50MB)
+                    <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1 dicom-badge">
+                        <i class="fa fa-file-medical-o text-white"></i> DICOM/DCM (≤50MB)
                     </span>
                     <span class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 flex items-center gap-1">
                         <i class="fa fa-check-circle text-[#FF9500]"></i> 支持16位医疗影像
                     </span>
                 </div>
                 
-                <!-- 苹果风格上传区域 PRO -->
-                <div class="apple-gradient border-2 border-dashed border-white/20 rounded-xl p-8 text-center mb-6 hover:border-[#0A84FF]/50 transition-colors cursor-pointer" onclick="document.getElementById('image-upload').click()">
+                <!-- 苹果风格上传区域 PRO - 新增拖放功能 -->
+                <div class="apple-gradient border-2 border-dashed border-white/20 rounded-xl p-6 md:p-8 text-center mb-4 md:mb-6 hover:border-[#0A84FF]/50 transition-colors cursor-pointer" 
+                     onclick="document.getElementById('image-upload').click()"
+                     id="upload-area">
                     <input type="file" id="image-upload" accept="image/*,.dcm,.dicom" class="hidden" onchange="previewImage(event)">
-                    <div class="w-16 h-16 apple-blue-gradient rounded-full flex items-center justify-center mx-auto mb-4 breath-fast neon-glow">
-                        <i class="fa fa-cloud-upload text-2xl text-white"></i>
+                    <div class="w-12 h-12 md:w-16 md:h-16 apple-blue-gradient rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 breath-fast neon-glow">
+                        <i class="fa fa-cloud-upload text-xl md:text-2xl text-white"></i>
                     </div>
                     <p class="text-white/80 mb-1">拖放或点击上传X光影像</p>
                     <p class="text-xs text-white/40">支持最大50MB的医疗影像文件 | 支持批量上传(最多10张)</p>
                 </div>
 
                 <!-- 预览图容器 PRO -->
-                <div id="preview-container" class="hidden mb-6">
-                    <div class="flex justify-between items-center mb-3">
+                <div id="preview-container" class="hidden mb-4 md:mb-6">
+                    <div class="flex justify-between items-center mb-2 md:mb-3">
                         <h4 class="text-sm font-medium text-white/80">影像预览</h4>
-                        <!-- 伪高级预览控制 -->
+                        <!-- 伪高级预览控制 - 新增实际功能 -->
                         <div class="flex gap-2">
-                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="zoomImage(true)">
                                 <i class="fa fa-search-plus text-[#0A84FF]"></i> 放大
                             </button>
-                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="zoomImage(false)">
+                                <i class="fa fa-search-minus text-[#0A84FF]"></i> 缩小
+                            </button>
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="adjustImage()">
                                 <i class="fa fa-adjust text-[#AF52DE]"></i> 调窗
                             </button>
                         </div>
                     </div>
-                    <div class="apple-gradient rounded-xl border border-white/10 p-2">
-                        <img id="original-image" class="w-full h-64 object-contain rounded-lg">
+                    <div class="apple-gradient image-preview-container image-viewer-bg p-2 overflow-hidden">
+                        <img id="original-image" class="w-full h-48 md:h-64 object-contain rounded-lg transition-transform duration-300" style="transform: scale(1); cursor: grab;" ondragstart="return false;">
                     </div>
-                    <!-- 伪影像信息 -->
-                    <div class="mt-2 grid grid-cols-2 gap-2 text-[10px] text-white/60">
+                    <!-- 伪影像信息 - 新增实际文件信息展示 -->
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-[10px] text-white/60" id="image-info">
                         <div class="bg-white/5 p-2 rounded border border-white/5">像素尺寸: <span class="text-white/80">2048×1536</span></div>
                         <div class="bg-white/5 p-2 rounded border border-white/5">DPI: <span class="text-white/80">300</span></div>
                         <div class="bg-white/5 p-2 rounded border border-white/5">位深度: <span class="text-white/80">16bit</span></div>
@@ -368,27 +515,27 @@
                     </div>
                 </div>
 
-                <!-- 苹果风格按钮组 PRO -->
-                <div class="flex flex-col gap-3">
-                    <button id="analyze-btn" class="apple-blue-gradient text-white py-3 rounded-xl font-medium neon-glow hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <!-- 苹果风格按钮组 PRO - 新增点击状态 -->
+                <div class="flex flex-col gap-2 md:gap-3">
+                    <button id="analyze-btn" class="apple-blue-gradient text-white py-2 md:py-3 rounded-xl font-medium neon-glow hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed apple-btn" disabled>
                         <i class="fa fa-magic"></i>
                         启动AI智能分析
                         <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">v2.1</span>
                     </button>
                     
-                    <div class="flex gap-3">
-                        <button id="clear-btn" class="flex-1 apple-gradient text-white py-3 rounded-xl font-medium border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                    <div class="flex gap-2 md:gap-3">
+                        <button id="clear-btn" class="flex-1 apple-gradient text-white py-2 md:py-3 rounded-xl font-medium border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2 apple-btn">
                             <i class="fa fa-refresh"></i>
                             清空
                         </button>
-                        <button class="flex-1 apple-gradient text-white py-3 rounded-xl font-medium border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                        <button class="flex-1 apple-gradient text-white py-2 md:py-3 rounded-xl font-medium border border-white/10 hover:bg-white/5 transition-colors flex items-center justify-center gap-2 apple-btn" onclick="showToast('模板库加载中...', 'success')">
                             <i class="fa fa-folder-open"></i>
                             模板库
                         </button>
                     </div>
                     
                     <!-- 伪高级功能开关 -->
-                    <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                    <div class="mt-2 flex items-center justify-between text-xs text-white/70 flex-wrap gap-2">
                         <label class="flex items-center gap-2">
                             <input type="checkbox" checked class="apple-glass rounded border border-white/20">
                             <span>自动优化影像质量</span>
@@ -402,37 +549,39 @@
             </div>
 
             <!-- AI分析结果区 PRO -->
-            <div class="apple-glass rounded-2xl p-6 md:p-8 border border-white/10 hover-lift">
+            <div class="apple-glass rounded-2xl p-4 md:p-6 border border-white/10 hover-lift relative">
                 <!-- 伪高级角标 -->
-                <div class="absolute top-4 right-4 apple-green-gradient text-xs px-2 py-1 rounded-full neon-glow-green">
+                <div class="absolute top-3 right-3 apple-green-gradient text-xs px-2 py-1 rounded-full neon-glow-green">
                     双模型验证
                 </div>
                 
-                <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                <h3 class="text-lg font-semibold mb-4 md:mb-6 flex items-center gap-2">
                     <i class="fa fa-bar-chart text-[#5E5CE6]"></i>
                     AI诊断结果
                     <span class="text-xs bg-white/5 px-2 py-0.5 rounded-full text-white/60">实时更新</span>
                 </h3>
 
-                <!-- 标注后影像 PRO -->
-                <div id="result-image-container" class="hidden mb-6">
-                    <div class="flex justify-between items-center mb-3">
+                <!-- 标注后影像 PRO - 新增导出功能 -->
+                <div id="result-image-container" class="hidden mb-4 md:mb-6">
+                    <div class="flex justify-between items-center mb-2 md:mb-3">
                         <h4 class="text-sm font-medium text-white/80 flex items-center gap-1">
                             <i class="fa fa-crosshairs text-[#FF3B30]"></i>
                             病变区域AI标注
                         </h4>
-                        <!-- 伪标注控制 -->
+                        <!-- 伪标注控制 - 新增实际功能 -->
                         <div class="flex gap-2">
-                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
-                                <i class="fa fa-eye text-[#0A84FF]"></i> 显示/隐藏标注
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="toggleAnnotation()">
+                                <i class="fa fa-eye text-[#0A84FF]"></i> <span id="annotation-toggle-text">隐藏</span>标注
                             </button>
-                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="exportAnnotatedImage()">
                                 <i class="fa fa-download text-[#34C759]"></i> 导出标注
                             </button>
                         </div>
                     </div>
-                    <div class="apple-gradient rounded-xl border border-white/10 p-2">
-                        <img id="annotated-image" class="w-full h-64 object-contain rounded-lg">
+                    <div class="apple-gradient image-preview-container image-viewer-bg p-2 overflow-hidden">
+                        <img id="annotated-image" class="w-full h-48 md:h-64 object-contain rounded-lg">
+                        <!-- 标注层 - 用于显示/隐藏 -->
+                        <div id="annotation-layer" class="absolute inset-0 pointer-events-none"></div>
                     </div>
                     <!-- 伪标注信息 -->
                     <div class="mt-2 grid grid-cols-3 gap-2 text-[10px] text-white/60">
@@ -443,8 +592,8 @@
                 </div>
 
                 <!-- 核心诊断结论 PRO -->
-                <div id="diagnosis-card" class="apple-glass rounded-xl p-4 mb-6 hidden border border-[#0A84FF]/20">
-                    <div class="flex justify-between items-center mb-3">
+                <div id="diagnosis-card" class="apple-glass rounded-xl p-3 md:p-4 mb-4 md:mb-6 hidden border border-[#0A84FF]/20 fade-in">
+                    <div class="flex justify-between items-center mb-2 md:mb-3">
                         <h4 class="text-sm font-bold flex items-center gap-2">
                             <i class="fa fa-stethoscope text-[#FF3B30]"></i>
                             核心诊断结论
@@ -455,7 +604,7 @@
                         <!-- AI结果填充区 -->
                     </div>
                     <!-- 伪高级风险评估 -->
-                    <div class="mt-3 pt-3 border-t border-white/10">
+                    <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-white/10">
                         <div class="text-xs text-white/70 mb-1">临床风险评估</div>
                         <div class="flex items-center gap-2">
                             <div class="w-full bg-white/5 rounded-full h-1.5">
@@ -467,37 +616,37 @@
                 </div>
 
                 <!-- AI置信度图表 PRO -->
-                <div id="chart-container" class="hidden mb-6">
-                    <div class="flex justify-between items-center mb-3">
+                <div id="chart-container" class="hidden mb-4 md:mb-6 fade-in">
+                    <div class="flex justify-between items-center mb-2 md:mb-3">
                         <h4 class="text-sm font-medium text-white/80 flex items-center gap-1">
                             <i class="fa fa-percent text-[#0A84FF]"></i>
                             AI识别置信度分布
                         </h4>
-                        <!-- 伪图表控制 -->
+                        <!-- 伪图表控制 - 新增实际功能 -->
                         <div class="flex gap-2">
-                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
-                                <i class="fa fa-exchange text-[#0A84FF]"></i> 切换视图
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="toggleChartView()">
+                                <i class="fa fa-exchange text-[#0A84FF]"></i> <span id="chart-view-text">切换</span>视图
                             </button>
-                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                            <button class="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="showToast('图表已分享至医疗工作站', 'success')">
                                 <i class="fa fa-share text-[#34C759]"></i> 分享
                             </button>
                         </div>
                     </div>
-                    <div class="apple-gradient rounded-xl border border-white/10 p-3">
-                        <canvas id="confidence-chart" class="w-full h-48"></canvas>
+                    <div class="apple-gradient rounded-xl border border-white/10 p-2 md:p-3">
+                        <canvas id="confidence-chart" class="w-full h-40 md:h-48"></canvas>
                     </div>
                 </div>
 
                 <!-- AI专业分析 PRO -->
-                <div id="ai-analysis" class="apple-glass rounded-xl p-4 hidden border border-[#5E5CE6]/20">
-                    <div class="flex justify-between items-center mb-3">
+                <div id="ai-analysis" class="apple-glass rounded-xl p-3 md:p-4 hidden border border-[#5E5CE6]/20 fade-in">
+                    <div class="flex justify-between items-center mb-2 md:mb-3">
                         <h4 class="text-sm font-bold flex items-center gap-2">
                             <i class="fa fa-comment-o text-[#5E5CE6]"></i>
                             AI专业分析建议
                         </h4>
                         <span class="text-[10px] bg-white/5 px-2 py-0.5 rounded-full text-white/60">v2.1模型</span>
                     </div>
-                    <p id="analysis-text" class="text-sm text-white/70 italic leading-relaxed mb-3">
+                    <p id="analysis-text" class="text-sm text-white/70 italic leading-relaxed mb-2 md:mb-3 mobile-text-sm">
                         基于影像特征分析，病变区域显示骨皮质不连续，断端移位约2mm，符合斜形骨折影像学特征。建议结合临床体征进一步确认，必要时行CT三维重建检查。
                     </p>
                     <!-- 伪高级建议标签 -->
@@ -510,14 +659,14 @@
                 </div>
 
                 <!-- 初始空状态 PRO -->
-                <div id="empty-state" class="text-center py-16">
-                    <div class="w-16 h-16 apple-gradient rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10 breath">
-                        <i class="fa fa-info-circle text-2xl text-white/60"></i>
+                <div id="empty-state" class="text-center py-10 md:py-16">
+                    <div class="w-12 h-12 md:w-16 md:h-16 apple-gradient rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border border-white/10 breath">
+                        <i class="fa fa-info-circle text-xl md:text-2xl text-white/60"></i>
                     </div>
                     <p class="text-white/70 mb-2">请上传X光影像并启动AI分析</p>
-                    <p class="text-xs text-white/40 mb-4">AI将自动识别骨折类型并标注病变区域</p>
+                    <p class="text-xs text-white/40 mb-3 md:mb-4">AI将自动识别骨折类型并标注病变区域</p>
                     <!-- 伪高级提示 -->
-                    <div class="text-[10px] bg-white/5 px-3 py-2 rounded-lg border border-white/10 inline-block">
+                    <div class="text-[10px] bg-white/5 px-3 py-2 rounded-lg border border-white/10 inline-block mobile-text-sm">
                         <i class="fa fa-lightbulb-o text-[#FF9500] mr-1"></i>
                         提示: 上传DICOM格式影像可获得更高分析精度
                     </div>
@@ -526,17 +675,17 @@
         </div>
 
         <!-- 伪高级模型日志面板（纯装饰） -->
-        <div class="mt-8 apple-glass-dark rounded-2xl p-4 border border-white/8 hover-lift">
-            <div class="flex justify-between items-center mb-3">
+        <div class="mt-6 md:mt-8 apple-glass-dark rounded-2xl p-3 md:p-4 border border-white/8 hover-lift">
+            <div class="flex justify-between items-center mb-2 md:mb-3">
                 <h4 class="text-sm font-medium flex items-center gap-2">
                     <i class="fa fa-list-alt text-[#AF52DE]"></i>
                     模型运行日志
                 </h4>
-                <button class="text-xs bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors">
+                <button class="text-xs bg-white/5 px-2 py-1 rounded border border-white/10 hover:bg-white/10 transition-colors apple-btn" onclick="clearLogs()">
                     <i class="fa fa-clear text-[#FF3B30]"></i> 清空日志
                 </button>
             </div>
-            <div class="text-[10px] text-white/60 font-mono bg-black/30 rounded-lg p-3 h-24 overflow-y-auto">
+            <div class="text-[10px] text-white/60 font-mono bg-black/30 rounded-lg p-2 md:p-3 h-20 md:h-24 overflow-y-auto" id="model-logs">
                 <p><span class="text-[#34C759]">2025-03-15 14:28:45</span> [INFO] 模型加载完成 - EfficientNet-B7</p>
                 <p><span class="text-[#34C759]">2025-03-15 14:28:46</span> [INFO] vGPU初始化成功 - 4核心/8GB显存</p>
                 <p><span class="text-[#34C759]">2025-03-15 14:28:47</span> [INFO] 预处理模块加载完成 - v2.1.4</p>
@@ -547,17 +696,17 @@
         </div>
 
         <!-- 苹果风格底部信息 PRO -->
-        <div class="mt-8 apple-glass rounded-2xl p-4 border border-white/10">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50">
-                <div class="flex flex-col md:flex-row gap-4">
+        <div class="mt-6 md:mt-8 apple-glass rounded-2xl p-3 md:p-4 border border-white/10">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 text-xs text-white/50">
+                <div class="flex flex-col md:flex-row gap-3 md:gap-4 text-center md:text-left">
                     <p>开发者：문석연 (WenShuoyuan)</p>
                     <p>ID: AI-MED-2025-0078</p>
                 </div>
-                <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex flex-col md:flex-row gap-3 md:gap-4 text-center md:text-center">
                     <p>© 2025 Apple Design Pro · 医疗AI演示系统</p>
-                    <p>模型版本：BoneFracture-AI-v2.1 · TensorFlow JS 4.14.0</p>
+                    <p class="mobile-hide">模型版本：BoneFracture-AI-v2.1 · TensorFlow JS 4.14.0</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 text-center md:text-right">
                     <span class="w-2 h-2 bg-[#34C759] rounded-full breath"></span>
                     <p>最后更新: 2025-03-15 14:28</p>
                 </div>
@@ -590,7 +739,7 @@
                 color: "#0A84FF", 
                 bbox: [160, 110, 360, 410],
                 confidence: 98.7,
-                analysis: "骨折线与骨干纵轴呈一定角度，断端移位约2mm，符合斜形骨折影像学特征。建议结合临床体征进一步确认，必要时行CT三维重建检查。"
+                analysis: "影像显示骨皮质不连续，断端移位约2mm，符合斜形骨折影像学特征。建议结合临床体征进一步确认，必要时行CT三维重建检查。"
             },
             "横形骨折": { 
                 en: "Transverse Fracture", 
@@ -610,6 +759,16 @@
             }
         };
 
+        // 全局变量
+        let imageScale = 1; // 图片缩放比例
+        let imageBrightness = 1; // 图片亮度
+        let imageContrast = 1; // 图片对比度
+        let annotationVisible = true; // 标注是否可见
+        let chartType = 'bar'; // 图表类型
+        let uploadedFileName = ''; // 上传的文件名
+        let isDragging = false; // 是否正在拖拽图片
+        let startX, startY, translateX = 0, translateY = 0; // 拖拽相关变量
+
         // DOM元素
         const imageUpload = document.getElementById('image-upload');
         const originalImage = document.getElementById('original-image');
@@ -626,75 +785,252 @@
         const emptyState = document.getElementById('empty-state');
         const scanOverlay = document.getElementById('scan-overlay');
         const scanProgress = document.getElementById('scan-progress');
+        const scanStatus = document.getElementById('scan-status');
+        const imageInfo = document.getElementById('image-info');
+        const annotationToggleText = document.getElementById('annotation-toggle-text');
+        const chartViewText = document.getElementById('chart-view-text');
+        const modelLogs = document.getElementById('model-logs');
 
-        // 预览图片
+        // 灵动岛相关元素
+        const dynamicIsland = document.getElementById('dynamic-island');
+        const islandText = document.getElementById('island-text');
+        const islandProgress = document.getElementById('island-progress');
+
+        // 拖放上传功能实现
+        const uploadArea = document.getElementById('upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-[#0A84FF]/50');
+            uploadArea.classList.add('bg-white/5');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('border-[#0A84FF]/50');
+            uploadArea.classList.remove('bg-white/5');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-[#0A84FF]/50');
+            uploadArea.classList.remove('bg-white/5');
+            
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                // 文件大小校验
+                if (file.size > 50 * 1024 * 1024) { // 50MB
+                    showToast('文件大小超过50MB限制', 'error');
+                    return;
+                }
+                if (file.size > 20 * 1024 * 1024 && !['.dcm', '.dicom'].includes(getFileExtension(file.name))) {
+                    showToast('图片文件大小超过20MB限制', 'error');
+                    return;
+                }
+                
+                imageUpload.files = e.dataTransfer.files;
+                previewImage({ target: { files: e.dataTransfer.files } });
+                addLog(`[INFO] 文件拖放上传: ${file.name} (${formatFileSize(file.size)})`);
+            }
+        });
+
+        // 图片拖拽平移功能
+        originalImage.addEventListener('mousedown', (e) => {
+            if (imageScale > 1) { // 仅放大后可拖动
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                originalImage.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            
+            // 限制拖动范围
+            const maxX = (originalImage.offsetWidth * (imageScale - 1)) / 2;
+            const maxY = (originalImage.offsetHeight * (imageScale - 1)) / 2;
+            
+            translateX = Math.max(-maxX, Math.min(maxX, translateX));
+            translateY = Math.max(-maxY, Math.min(maxY, translateY));
+            
+            originalImage.style.transform = `scale(${imageScale}) translate(${translateX}px, ${translateY}px)`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            originalImage.style.cursor = imageScale > 1 ? 'grab' : 'default';
+        });
+
+        // 鼠标滚轮缩放影像
+        originalImage.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomImage(true); // 滚轮向上放大
+            } else {
+                zoomImage(false); // 滚轮向下缩小
+            }
+        });
+
+        // 预览图片 - 优化：增加文件信息展示和大小校验
         function previewImage(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    originalImage.src = e.target.result;
-                    previewContainer.classList.remove('hidden');
-                    analyzeBtn.disabled = false;
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+            
+            // 文件大小校验
+            if (file.size > 50 * 1024 * 1024) { // 50MB
+                showToast('文件大小超过50MB限制', 'error');
+                imageUpload.value = '';
+                return;
             }
+            if (file.size > 20 * 1024 * 1024 && !['.dcm', '.dicom'].includes(getFileExtension(file.name))) {
+                showToast('图片文件大小超过20MB限制', 'error');
+                imageUpload.value = '';
+                return;
+            }
+            
+            uploadedFileName = file.name;
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+                analyzeBtn.disabled = false;
+                
+                // 重置图片缩放和调窗参数
+                imageScale = 1;
+                imageBrightness = 1;
+                imageContrast = 1;
+                translateX = 0;
+                translateY = 0;
+                updateImageStyle();
+                
+                // 显示实际文件信息
+                const img = new Image();
+                img.onload = function() {
+                    imageInfo.innerHTML = `
+                        <div class="bg-white/5 p-2 rounded border border-white/5">文件名: <span class="text-white/80">${file.name}</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">文件大小: <span class="text-white/80">${formatFileSize(file.size)}</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">像素尺寸: <span class="text-white/80">${this.width}×${this.height}</span></div>
+                        <div class="bg-white/5 p-2 rounded border border-white/5">格式: <span class="text-white/80">${getFileExtension(file.name).toUpperCase().replace('.', '')}</span></div>
+                    `;
+                };
+                img.src = e.target.result;
+                
+                addLog(`[INFO] 文件选择成功: ${file.name} (${formatFileSize(file.size)})`);
+                showToast(`文件上传成功: ${file.name}`, 'success');
+            };
+            
+            reader.onerror = () => {
+                showToast('文件读取失败，请选择有效的图片文件', 'error');
+                addLog(`[ERROR] 文件读取失败: ${file.name}`);
+            };
+            
+            reader.readAsDataURL(file);
         }
 
-        // AI分析主函数 PRO
+        // 显示灵动岛状态提示
+        function showDynamicIsland(text, progress = 0) {
+            islandText.textContent = text;
+            islandProgress.style.width = `${progress}%`;
+            dynamicIsland.classList.remove('hidden');
+            
+            // 根据进度调整灵动岛宽度
+            dynamicIsland.style.width = progress > 0 ? '280px' : 'auto';
+            
+            return dynamicIsland;
+        }
+
+        // AI分析主函数 PRO - 使用灵动岛替代原有扫描遮罩
         analyzeBtn.addEventListener('click', async () => {
             if (!originalImage.src) return;
 
-            // 显示AI扫描动效
-            scanOverlay.classList.remove('hidden');
+            // 显示灵动岛状态提示
+            const island = showDynamicIsland('正在预处理影像...', 0);
             analyzeBtn.disabled = true;
             
-            // 伪进度条动画
-            scanProgress.style.width = '100%';
-            
-            // 模拟AI推理延迟
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            // 分步状态提示
+            try {
+                // 步骤1：影像预处理
+                await new Promise(resolve => setTimeout(resolve, 500));
+                showDynamicIsland('正在提取影像特征...', 20);
+                
+                // 步骤2：特征提取
+                await new Promise(resolve => setTimeout(resolve, 800));
+                showDynamicIsland('AI模型正在推理...', 50);
+                
+                // 步骤3：模型推理
+                await new Promise(resolve => setTimeout(resolve, 700));
+                showDynamicIsland('正在生成诊断结果...', 80);
+                
+                // 步骤4：结果生成
+                await new Promise(resolve => setTimeout(resolve, 500));
+                showDynamicIsland('分析完成！', 100);
 
-            // 选择演示骨折类型
-            const disease = "斜形骨折";
-            const info = diseaseInfo[disease];
-            
-            // 标注图片（苹果风格像素级标注）
-            annotateImage(originalImage.src, info.bbox, info.color, info.pos);
-            
-            // 填充诊断结果
-            diagnosisResult.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="inline-block w-3 h-3 rounded-full" style="background-color: ${info.color}"></span>
-                    <strong>骨折类型：</strong>${disease} (${info.en})
-                </div>
-                <div><strong>病变位置：</strong>${info.pos}</div>
-                <div><strong>AI识别置信度：</strong><span style="color: ${info.color}" class="font-bold">${info.confidence}%</span></div>
-                <div><strong>骨折稳定性：</strong>${["青枝骨折", "横形骨折", "嵌插骨折"].includes(disease) ? "稳定型" : "不稳定型"}</div>
-                <div><strong>影像特征：</strong>骨皮质不连续，断端移位约2mm</div>
-            `;
-            
-            // 更新专业分析
-            analysisText.textContent = info.analysis;
-            
-            // 生成置信度图表（苹果风格）
-            createConfidenceChart(disease, info.confidence);
-            
-            // 显示结果区域
-            scanOverlay.classList.add('hidden');
-            emptyState.classList.add('hidden');
-            resultImageContainer.classList.remove('hidden');
-            diagnosisCard.classList.remove('hidden');
-            chartContainer.classList.remove('hidden');
-            aiAnalysis.classList.remove('hidden');
-            
-            // 重置进度条
-            setTimeout(() => {
-                scanProgress.style.width = '0';
-            }, 500);
+                // 选择演示骨折类型
+                const disease = "斜形骨折";
+                const info = diseaseInfo[disease];
+                
+                // 标注图片（苹果风格像素级标注）
+                annotateImage(originalImage.src, info.bbox, info.color, info.pos);
+                
+                // 填充诊断结果（医疗分级展示）
+                diagnosisResult.innerHTML = `
+                    <div class="flex items-center gap-2 p-2 bg-[#FF3B30]/10 rounded-lg border border-[#FF3B30]/20">
+                        <span class="inline-block w-3 h-3 rounded-full bg-[#FF3B30]"></span>
+                        <strong>紧急程度：</strong><span class="text-[#FF3B30]">低风险</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-3 h-3 rounded-full" style="background-color: ${info.color}"></span>
+                        <strong>骨折类型：</strong>${disease} (${info.en})
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-3 h-3 rounded-full bg-[#0A84FF]"></span>
+                        <strong>病变位置：</strong>${info.pos}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-3 h-3 rounded-full bg-[#34C759]"></span>
+                        <strong>置信度：</strong><span style="color: ${info.color}" class="font-bold">${info.confidence}%</span>
+                    </div>
+                    <div><strong>骨折稳定性：</strong>${["青枝骨折", "横形骨折", "嵌插骨折"].includes(disease) ? "稳定型" : "不稳定型"}</div>
+                    <div><strong>影像特征：</strong>骨皮质不连续，断端移位约2mm</div>
+                `;
+                
+                // 更新专业分析
+                analysisText.textContent = info.analysis;
+                
+                // 生成置信度图表（苹果风格）
+                createConfidenceChart(disease, info.confidence);
+                
+                // 显示结果区域
+                emptyState.classList.add('hidden');
+                resultImageContainer.classList.remove('hidden');
+                diagnosisCard.classList.remove('hidden');
+                chartContainer.classList.remove('hidden');
+                aiAnalysis.classList.remove('hidden');
+                
+                // 日志记录
+                addLog(`[INFO] AI分析完成 - 识别结果：${disease} (置信度: ${info.confidence}%)`);
+                showToast('AI分析完成，已生成诊断报告', 'success');
+                
+                // 2秒后隐藏灵动岛
+                setTimeout(() => {
+                    island.classList.add('hidden');
+                }, 2000);
+                
+            } catch (error) {
+                // 错误处理
+                showDynamicIsland('分析失败！', 100);
+                showToast('AI分析失败，请重试', 'error');
+                addLog(`[ERROR] AI分析失败: ${error.message}`);
+                analyzeBtn.disabled = false;
+                
+                // 2秒后隐藏灵动岛
+                setTimeout(() => {
+                    dynamicIsland.classList.add('hidden');
+                }, 2000);
+            }
         });
 
-        // 清空功能
+        // 清空功能 - 优化：增加日志记录
         clearBtn.addEventListener('click', () => {
             imageUpload.value = '';
             previewContainer.classList.add('hidden');
@@ -705,13 +1041,22 @@
             aiAnalysis.classList.add('hidden');
             analyzeBtn.disabled = true;
             
+            // 重置图片参数
+            imageScale = 1;
+            imageBrightness = 1;
+            imageContrast = 1;
+            translateX = 0;
+            translateY = 0;
+            updateImageStyle();
+            
             // 重置图表
             if (window.confidenceChart) {
                 window.confidenceChart.destroy();
             }
             
-            // 重置进度条
-            scanProgress.style.width = '0';
+            // 日志记录
+            addLog('[INFO] 用户清空了上传的影像和分析结果');
+            showToast('已清空所有数据', 'success');
         });
 
         // 苹果风格图片标注 PRO
@@ -763,7 +1108,7 @@
             img.src = imageSrc;
         }
 
-        // 苹果风格置信度图表 PRO
+        // 苹果风格置信度图表 PRO - 优化：支持切换图表类型
         function createConfidenceChart(selectedDisease, selectedConfidence) {
             const ctx = document.getElementById('confidence-chart').getContext('2d');
             
@@ -779,7 +1124,7 @@
             
             // 创建苹果风格图表
             window.confidenceChart = new Chart(ctx, {
-                type: 'bar',
+                type: chartType,
                 data: {
                     labels: diseases,
                     datasets: [{
@@ -834,7 +1179,7 @@
                         },
                         x: {
                             grid: {
-                                display: false
+                                display: chartType !== 'radar'
                             },
                             ticks: {
                                 color: 'rgba(255, 255, 255, 0.7)',
@@ -857,6 +1202,187 @@
             });
         }
 
+        // 图片缩放功能
+        function zoomImage(zoomIn) {
+            if (zoomIn) {
+                imageScale = Math.min(imageScale + 0.1, 2.0); // 最大放大2倍
+            } else {
+                imageScale = Math.max(imageScale - 0.1, 0.5); // 最小缩小到0.5倍
+            }
+            updateImageStyle();
+            addLog(`[INFO] 图片缩放至 ${imageScale.toFixed(1)} 倍`);
+        }
+
+        // 图片调窗（亮度/对比度）功能
+        function adjustImage() {
+            // 循环切换预设值
+            const presets = [
+                { brightness: 1, contrast: 1 },    // 正常
+                { brightness: 1.2, contrast: 1.3 }, // 增强
+                { brightness: 0.9, contrast: 1.5 }, // 高对比
+                { brightness: 1.3, contrast: 0.9 }  // 高亮度
+            ];
+            
+            // 找到当前预设索引
+            let currentIndex = 0;
+            for (let i = 0; i < presets.length; i++) {
+                if (presets[i].brightness === imageBrightness && presets[i].contrast === imageContrast) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+            
+            // 切换到下一个预设
+            const nextPreset = presets[(currentIndex + 1) % presets.length];
+            imageBrightness = nextPreset.brightness;
+            imageContrast = nextPreset.contrast;
+            
+            updateImageStyle();
+            
+            // 提示用户
+            const presetNames = ['正常', '增强', '高对比', '高亮度'];
+            showToast(`影像调窗已切换至：${presetNames[(currentIndex + 1) % presets.length]}模式`, 'success');
+            addLog(`[INFO] 影像调窗 - 亮度: ${imageBrightness}, 对比度: ${imageContrast}`);
+        }
+
+        // 更新图片样式（缩放+调窗+拖拽）
+        function updateImageStyle() {
+            originalImage.style.transform = `scale(${imageScale}) translate(${translateX}px, ${translateY}px)`;
+            originalImage.style.transformOrigin = 'center';
+            originalImage.style.filter = `brightness(${imageBrightness}) contrast(${imageContrast})`;
+            annotatedImage.style.filter = `brightness(${imageBrightness}) contrast(${imageContrast})`;
+            originalImage.style.cursor = imageScale > 1 ? 'grab' : 'default';
+        }
+
+        // 显示/隐藏标注
+        function toggleAnnotation() {
+            annotationVisible = !annotationVisible;
+            if (annotationVisible) {
+                annotatedImage.style.opacity = '1';
+                annotationToggleText.textContent = '隐藏';
+            } else {
+                annotatedImage.style.opacity = '0';
+                annotationToggleText.textContent = '显示';
+            }
+            addLog(`[INFO] ${annotationVisible ? '显示' : '隐藏'}了病变区域标注`);
+            showToast(`${annotationVisible ? '显示' : '隐藏'}标注成功`, 'success');
+        }
+
+        // 切换图表视图
+        function toggleChartView() {
+            chartType = chartType === 'bar' ? 'radar' : 'bar';
+            chartViewText.textContent = chartType === 'bar' ? '切换' : '还原';
+            
+            // 重新生成图表
+            const disease = "斜形骨折";
+            const info = diseaseInfo[disease];
+            createConfidenceChart(disease, info.confidence);
+            
+            addLog(`[INFO] 图表视图切换为: ${chartType === 'bar' ? '柱状图' : '雷达图'}`);
+            showToast(`图表已切换为${chartType === 'bar' ? '柱状图' : '雷达图'}`, 'success');
+        }
+
+        // 导出标注图片
+        function exportAnnotatedImage() {
+            if (!annotatedImage.src) {
+                showToast('暂无标注图片可导出', 'error');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = annotatedImage.src;
+            link.download = `骨折诊断标注_${uploadedFileName || new Date().getTime()}.png`;
+            link.click();
+            
+            addLog(`[INFO] 导出标注图片: ${link.download}`);
+            showToast('标注图片导出成功', 'success');
+        }
+
+        // 导出诊断报告
+        function exportReport() {
+            if (!diagnosisCard.classList.contains('hidden')) {
+                // 简单模拟导出PDF（实际项目中需要PDF库）
+                const reportContent = `
+                    AI骨科骨折智能诊断报告
+                    ======================
+                    生成时间: ${new Date().toLocaleString()}
+                    上传文件: ${uploadedFileName || '未知文件'}
+                    ${diagnosisResult.innerText}
+                    
+                    AI专业分析建议:
+                    ${analysisText.innerText}
+                    
+                    系统信息: BoneFracture-AI-v2.1 | Apple Design Pro
+                `;
+                
+                // 创建文本文件下载
+                const blob = new Blob([reportContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `骨折诊断报告_${new Date().getTime()}.txt`;
+                link.click();
+                
+                addLog('[INFO] 导出诊断报告成功');
+                showToast('诊断报告导出成功', 'success');
+            } else {
+                showToast('暂无诊断结果可导出', 'error');
+            }
+        }
+
+        // 吐司提示功能
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            toast.className = `${type === 'error' ? 'error-toast' : 'success-toast'} px-4 py-2 rounded-lg flex items-center gap-2`;
+            toast.innerHTML = `
+                <i class="fa ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // 3秒后移除
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 获取文件扩展名
+        function getFileExtension(filename) {
+            return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
+        }
+
+        // 添加日志
+        function addLog(message) {
+            const timestamp = new Date().toLocaleString().replace(/\//g, '-');
+            const logLine = `<p><span class="text-[#34C759]">${timestamp}</span> ${message}</p>`;
+            modelLogs.innerHTML += logLine;
+            modelLogs.scrollTop = modelLogs.scrollHeight; // 滚动到底部
+        }
+
+        // 清空日志
+        function clearLogs() {
+            modelLogs.innerHTML = `
+                <p><span class="text-[#34C759]">${new Date().toLocaleString().replace(/\//g, '-')}</span> [INFO] 日志已清空</p>
+            `;
+            showToast('模型日志已清空', 'success');
+        }
+
         // 页面加载时的伪数据动画
         window.addEventListener('load', () => {
             // 给所有counter元素添加动画延迟
@@ -864,6 +1390,37 @@
             counters.forEach((counter, index) => {
                 counter.style.animationDelay = `${index * 0.1}s`;
             });
+            
+            addLog('[INFO] 系统初始化完成，等待用户操作');
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+U 上传文件
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                document.getElementById('image-upload').click();
+            }
+            // Ctrl+A 分析
+            if (e.ctrlKey && e.key === 'a' && !analyzeBtn.disabled) {
+                e.preventDefault();
+                analyzeBtn.click();
+            }
+            // ESC 清空
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                clearBtn.click();
+            }
+            // + 放大图片
+            if (e.key === '+' && !previewContainer.classList.contains('hidden')) {
+                e.preventDefault();
+                zoomImage(true);
+            }
+            // - 缩小图片
+            if (e.key === '-' && !previewContainer.classList.contains('hidden')) {
+                e.preventDefault();
+                zoomImage(false);
+            }
         });
     </script>
 </body>
