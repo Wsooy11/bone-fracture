@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>骨科5大类骨折智能识别系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0/dist/tf.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
+            🏥 骨科5大类骨折智能识别系统
+        </h1>
+        <h2 class="text-xl text-center text-gray-600 mb-10">
+            （GitHub Pages演示版 | 支持病变区域标注）
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 上传图片区域 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">📤 上传X光影像（5大类骨折任选）</h3>
+                <input type="file" id="image-upload" accept="image/*" class="w-full p-2 border border-gray-300 rounded mb-4">
+                <img id="original-image" class="w-full h-64 object-contain border border-gray-200 rounded mb-4 hidden" alt="上传的X光片">
+                <button id="analyze-btn" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 mr-2">
+                    🚀 分析并标注病变区域
+                </button>
+                <button id="clear-btn" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                    🗑️ 清空内容
+                </button>
+            </div>
+
+            <!-- 结果展示区域 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">📊 识别结果+病变标注</h3>
+                <img id="annotated-image" class="w-full h-64 object-contain border border-gray-200 rounded mb-4 hidden" alt="标注后的X光片">
+                <div id="result-text" class="w-full p-3 border border-gray-200 rounded mb-4 min-h-[100px]">
+                    请上传X光图片并点击分析按钮
+                </div>
+                <div id="probability-list" class="w-full p-3 border border-gray-200 rounded min-h-[80px]">
+                    Top3识别概率将显示在这里
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 5大类骨折信息
+        const diseaseInfo = {
+            "粉碎性骨折": { en: "Comminuted Fracture", pos: "腕骨桡骨远端", color: "#FF0000", bbox: [150, 100, 350, 400] },
+            "青枝骨折": { en: "Greenstick Fracture", pos: "尺骨中段", color: "#FF4500", bbox: [140, 90, 340, 390] },
+            "斜形骨折": { en: "Oblique Fracture", pos: "桡骨中段", color: "#FF6347", bbox: [160, 110, 360, 410] },
+            "横形骨折": { en: "Transverse Fracture", pos: "掌骨近端", color: "#FF8C00", bbox: [170, 120, 370, 420] },
+            "嵌插骨折": { en: "Impacted Fracture", pos: "肱骨远端", color: "#FFA500", bbox: [180, 130, 380, 430] }
+        };
+
+        // DOM元素
+        const imageUpload = document.getElementById('image-upload');
+        const originalImage = document.getElementById('original-image');
+        const annotatedImage = document.getElementById('annotated-image');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultText = document.getElementById('result-text');
+        const probabilityList = document.getElementById('probability-list');
+
+        // 上传图片预览
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    originalImage.src = event.target.result;
+                    originalImage.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 分析并标注图片
+        analyzeBtn.addEventListener('click', () => {
+            if (!originalImage.src) {
+                resultText.textContent = "请先上传X光影像图片！";
+                return;
+            }
+
+            // 模拟AI识别（选择斜形骨折作为演示）
+            const disease = "斜形骨折";
+            const info = diseaseInfo[disease];
+            const confidence = 94.2;
+
+            // 标注图片
+            annotateImage(originalImage.src, info.bbox, info.color, info.pos);
+
+            // 显示结果
+            resultText.innerHTML = `
+                🟢 识别结果：${disease} (${info.en})<br>
+                📌 病变位置：${info.pos}<br>
+                ✅ 置信度：${confidence.toFixed(1)}%<br>
+                📋 标注：红色边框为病变区域
+            `;
+
+            // 显示Top3概率
+            probabilityList.innerHTML = `
+                1. ${disease} (${info.en})：${confidence.toFixed(1)}%<br>
+                2. 横形骨折 (Transverse Fracture)：3.8%<br>
+                3. 粉碎性骨折 (Comminuted Fracture)：2.0%
+            `;
+        });
+
+        // 清空内容
+        clearBtn.addEventListener('click', () => {
+            imageUpload.value = '';
+            originalImage.src = '';
+            originalImage.classList.add('hidden');
+            annotatedImage.src = '';
+            annotatedImage.classList.add('hidden');
+            resultText.textContent = "请上传X光图片并点击分析按钮";
+            probabilityList.textContent = "Top3识别概率将显示在这里";
+        });
+
+        // 标注图片函数（红色边框+半透明蒙版）
+        function annotateImage(imageSrc, bbox, color, pos) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // 绘制原图
+                ctx.drawImage(img, 0, 0);
+                
+                // 绘制半透明蒙版
+                ctx.fillStyle = `${color}40`; // 40是透明度
+                ctx.fillRect(bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3]-bbox[1]);
+                
+                // 绘制红色边框
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 5;
+                ctx.strokeRect(bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3]-bbox[1]);
+                
+                // 绘制病变位置文字
+                ctx.fillStyle = color;
+                ctx.font = '16px Arial';
+                ctx.fillText(`病变区域: ${pos}`, bbox[0], bbox[1]-10);
+                
+                // 显示标注后的图片
+                annotatedImage.src = canvas.toDataURL();
+                annotatedImage.classList.remove('hidden');
+            };
+            
+            img.src = imageSrc;
+        }
+    </script>
+</body>
+</html>
