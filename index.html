@@ -41,18 +41,25 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <!-- 顶部AI导航栏 -->
+    <!-- 顶部AI导航栏（核心大屏位置加名字） -->
     <header class="ai-gradient text-white py-4 px-6 shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-3 mb-3 md:mb-0">
                 <i class="fa fa-brain text-2xl"></i>
                 <h1 class="text-2xl font-bold">AI骨科骨折智能诊断系统</h1>
                 <span class="bg-white text-blue-600 text-xs px-2 py-1 rounded-full">医疗级v2.1</span>
             </div>
-            <div class="hidden md:flex items-center gap-4">
-                <span class="flex items-center gap-1"><i class="fa fa-tensorflow"></i> TensorFlow JS</span>
-                <span class="flex items-center gap-1"><i class="fa fa-medkit"></i> 骨科专科模型</span>
-                <span class="flex items-center gap-1"><i class="fa fa-shield"></i> 医疗数据加密</span>
+            <!-- 大屏显眼位置：韩语+英文名字 -->
+            <div class="flex items-center gap-6 bg-white/20 px-4 py-2 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-user-circle text-xl"></i>
+                    <span class="font-medium">문석연</span>
+                </div>
+                <div class="w-px h-6 bg-white/50"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-globe text-xl"></i>
+                    <span class="font-medium">WenShuoyuan</span>
+                </div>
             </div>
         </div>
     </header>
@@ -190,10 +197,10 @@
             </div>
         </div>
 
-        <!-- 底部AI模型说明 -->
+        <!-- 底部AI模型说明（再次加名字，双重显眼） -->
         <div class="mt-8 glass-effect rounded-xl p-4 shadow-lg border border-gray-200">
             <p class="text-xs text-gray-600 text-center">
-                本系统基于深度学习技术构建，仅用于教学演示，不构成临床诊断建议 | 模型版本：BoneFracture-AI-v2.1 | 训练框架：PyTorch 2.0 + TensorFlow JS
+                开发者：문석연 (WenShuoyuan) | 本系统基于深度学习技术构建，仅用于教学演示，不构成临床诊断建议 | 模型版本：BoneFracture-AI-v2.1 | 训练框架：PyTorch 2.0 + TensorFlow JS
             </p>
         </div>
     </main>
@@ -440,4 +447,4 @@
         }
     </script>
 </body>
-</html>
+</html>      
